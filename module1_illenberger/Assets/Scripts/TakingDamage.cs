@@ -23,7 +23,7 @@ public class TakingDamage : MonoBehaviourPunCallbacks
     public void  TakeDamage(int damage) //call it when u receive dmg/ when ray hits player
     {
       health -= damage;
-      Debug.Log(photonView.Owner.NickName + "'s is at" + health);
+      Debug.Log(photonView.Owner.NickName + "'s HP is at " + health);
 
       healthbar.fillAmount = health/startHealth; //updates bar across server
 
