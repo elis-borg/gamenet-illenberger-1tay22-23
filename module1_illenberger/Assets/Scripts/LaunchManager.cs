@@ -12,6 +12,12 @@ public class LaunchManager : MonoBehaviourPunCallbacks
     public GameObject ConnectionStatusPanel;
     public GameObject LobbyPanel;
 
+    void Awake()
+    {
+      PhotonNetwork.AutomaticallySyncScene = true; //every client that joins in will load the scene the master client has loaded
+      //go to check joinedroom(); where loadlvl is placed
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -87,6 +93,7 @@ public class LaunchManager : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
       Debug.Log(PhotonNetwork.NickName + " has entered " + PhotonNetwork.CurrentRoom.Name);
+      PhotonNetwork.LoadLevel("GameScene"); //type in the name of the scene that should be loaded
     }
     //can test if another player has entered, test with 2 builds
 
