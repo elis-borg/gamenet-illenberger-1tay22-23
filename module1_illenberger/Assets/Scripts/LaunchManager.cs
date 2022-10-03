@@ -21,7 +21,7 @@ public class LaunchManager : MonoBehaviourPunCallbacks
     // Start is called before the first frame update
     void Start()
     {
-      //only enter game panel should be active, enter name panel shouldnt
+      //only enter game panel should be active, other panels shouldnt be
       EnterGamePanel.SetActive(true);
       ConnectionStatusPanel.SetActive(false); //only active when connected
       LobbyPanel.SetActive(false);
