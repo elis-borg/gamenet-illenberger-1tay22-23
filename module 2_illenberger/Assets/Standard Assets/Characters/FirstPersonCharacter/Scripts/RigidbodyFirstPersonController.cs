@@ -129,7 +129,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         private void Update()
         {
-            //RotateView(); //so player view doesn't rotate with mouse
+            RotateView(); //so player view doesn't rotate with mouse without mobile implementations yet
 
             if (CrossPlatformInputManager.GetButtonDown("Jump") && !m_Jump)
             {
