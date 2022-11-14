@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using Photon.Pun;
 using UnityStandardAssets.Characters.FirstPerson;
 
@@ -16,6 +17,8 @@ public class PlayerSetup : MonoBehaviourPunCallbacks
 
     private Animator animator;
     public Avatar fpsAvatar, nonFpsAvatar; //since we're using different animator avatars, need to also assign which one to use
+
+    private Shooting shooting;
     // Start is called before the first frame update
     void Start()
     {
@@ -27,11 +30,15 @@ public class PlayerSetup : MonoBehaviourPunCallbacks
       animator.SetBool("isLocalPlayer", photonView.IsMine);
       animator.avatar = photonView.IsMine ? fpsAvatar : nonFpsAvatar;
 
+      shooting = this.GetComponent<Shooting>();
+
       if(photonView.IsMine){
         GameObject playerUi = Instantiate(playerUiPrefab);
         playerMovementCtrlr.fixedTouchFld = playerUi.transform.Find("RotationTouchFld").GetComponent<FixedTouchField>();
         playerMovementCtrlr.joystick = playerUi.transform.Find("Fixed Joystick").GetComponent<Joystick>();
         fpsCamera.enabled = true;
+
+        playerUi.transform.Find("FireBtn").GetComponent<Button>().onClick.AddListener(() => shooting.Fire());
       }
       else{
         playerMovementCtrlr.enabled = false;
