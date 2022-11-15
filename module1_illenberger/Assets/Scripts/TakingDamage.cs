@@ -4,7 +4,7 @@ using UnityEngine;
 using Photon.Pun;
 using UnityEngine.UI;
 
-public class TakingDamage : MonoBehaviourPunCallbacks
+public class TakingDamage : MonoBehaviourPunCallbacks //so u have access to photonview
 {
     [SerializeField]
     Image healthbar; //the fill is at 1, need a percentage on how to fill it up

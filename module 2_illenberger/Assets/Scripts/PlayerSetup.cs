@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Photon.Pun;
 using UnityStandardAssets.Characters.FirstPerson;
+using TMPro;
 
 public class PlayerSetup : MonoBehaviourPunCallbacks
 {
@@ -11,6 +12,9 @@ public class PlayerSetup : MonoBehaviourPunCallbacks
     public GameObject nonFpsModel;
 
     public GameObject playerUiPrefab;
+
+    [SerializeField]
+    TextMeshProUGUI playerNameText;
 
     public PlayerMovementCtrlr playerMovementCtrlr;
     public Camera fpsCamera;
@@ -45,6 +49,8 @@ public class PlayerSetup : MonoBehaviourPunCallbacks
         GetComponent<RigidbodyFirstPersonController>().enabled = false;
         fpsCamera.enabled = false;
       }
+
+      playerNameText.text = photonView.Owner.NickName;
     }
 
     // Update is called once per frame

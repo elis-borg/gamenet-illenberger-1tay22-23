@@ -42,7 +42,7 @@ public class NetworkMngr : MonoBehaviourPunCallbacks
 
     private Dictionary<string, RoomInfo> cachedRoomList; //when
     private Dictionary<string, GameObject> roomListGameObjs;
-    private Dictionary<int, GameObject> playerListGameObjs; //when
+    private Dictionary<int, GameObject> playerListGameObjs; 
 
 
     //#region Unity functions

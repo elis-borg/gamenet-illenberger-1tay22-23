@@ -9,10 +9,11 @@ public class Shooting : MonoBehaviourPunCallbacks
     public Camera camera;
     public GameObject hitFXPrefab;
 
-    [Header ("HP Stuff")]
+    [Header ("Player Stats")]
     public float startHealth = 100;
     private float health;
     public Image healthbar;
+    private int killCount;
 
     private Animator animator;
 
@@ -47,6 +48,18 @@ public class Shooting : MonoBehaviourPunCallbacks
         if (hit.collider.gameObject.CompareTag("Player") && !hit.collider.gameObject.GetComponent<PhotonView>().IsMine){ //dont hit ourselves when we fire
           //need to call an rpc function to deduct the playerhealth for every hit
           hit.collider.gameObject.GetComponent<PhotonView>().RPC("TakeDamage", RpcTarget.AllBuffered, 25); //allbuffered lets all current and future players receive the broadcast
+
+          if(hit.collider.gameObject.GetComponent<Shooting>().health <= 0){
+            Debug.Log(hit.collider.GetComponent<Shooting>().health);
+            killCount++;
+            }
+          Debug.Log(photonView.Owner.NickName + "kill count is at " + killCount);
+
+          if(killCount > 9) {
+            string winner = photonView.Owner.NickName;
+            Debug.Log(winner + " reached 10 kills!");
+            photonView.RPC("WinnerAnnouncement", RpcTarget.AllBuffered, winner);
+          }
         }
       }
     }
@@ -59,8 +72,13 @@ public class Shooting : MonoBehaviourPunCallbacks
 
       if(health <= 0){
         Die();
-        //but who shot who, every damage taken should output who shot it tothe player, PhotonMessageInfo parameter does that, it is also a default for all RPC functions
-        Debug.Log(info.Sender.NickName + " killed " + info.photonView.Owner.NickName); //who killed who
+        string victimName = photonView.Owner.NickName,
+               killerName = info.Sender.NickName;
+
+        /*but who shot who, every damage taken should output who shot it tothe player, PhotonMessageInfo parameter does that, it is also a default for all RPC functions
+        Debug.Log(info.Sender.NickName + " killed " + info.photonView.Owner.NickName); //is now found in KillerNotification();*/
+
+        photonView.RPC("KillerNotification", RpcTarget.All, victimName, killerName); //gives everyone a copy version
       }
     }
 
@@ -80,6 +98,44 @@ public class Shooting : MonoBehaviourPunCallbacks
       }
     }
 
+  [PunRPC]
+  IEnumerator WinnerAnnouncement(string winner)
+  {
+    GameObject winnerImg = GameObject.Find("WinnerTxt").transform.GetChild(0).gameObject;
+    winnerImg.GetComponent<Image>().enabled = true;
+    float ejectTime = 10.0f;
+
+    while(ejectTime > 0){
+      yield return new WaitForSeconds(1.0f);
+      ejectTime--;
+
+      this.transform.GetComponent<PlayerSetup>().playerUiPrefab.transform.Find("FireBtn").GetComponent<Button>().enabled = false; //walk freely but no more firing
+
+      winnerImg.transform.Find("Winner").GetComponent<Text>().text = winner + " won the match!";
+      winnerImg.transform.Find("RespawnTimer").GetComponent<Text>().text = "Returning to lobby in " + ejectTime.ToString(".00");
+    }
+    //GameManager.instance.WinnerDetermined(); //other player doesnt get booted due to lag between countdowns but it should work
+    //GameManager.instance.LeaveRoom();
+    GameManager.instance.Gameover();
+  }
+
+  [PunRPC]
+  IEnumerator KillerNotification(string victim, string killer)
+  {
+    GameObject killerImg = GameObject.Find("KillerTxt").transform.GetChild(0).gameObject;
+    killerImg.GetComponent<Image>().enabled = true;
+    float displayTime = 4.0f;
+
+    while(displayTime > 0){
+      yield return new WaitForSeconds(1.0f);
+      displayTime--;
+
+      killerImg.transform.Find("Text").GetComponent<Text>().text = victim  + " was tactically nuked by " + killer;
+    }
+    killerImg.transform.Find("Text").GetComponent<Text>().text = "";
+    killerImg.GetComponent<Image>().enabled = false;
+  }
+
   IEnumerator RespawnCountdown()
   {
     GameObject respawnTxt = GameObject.Find("RespawnTxt");
@@ -96,11 +152,11 @@ public class Shooting : MonoBehaviourPunCallbacks
     animator.SetBool("isDead", false);
     respawnTxt.GetComponent<Text>().text = "";
 
-    //respawn player after coutndown and reenable
+    /*respawn player after coutndown and reenable - CHANGE RESPAWN POINTS TO SINGLETON CLASS IN GAMEMANAGER.CS LATER
     int randomPointX = Random.Range(-20,20);
-    int randomPointZ = Random.Range(-20,20);
+    int randomPointZ = Random.Range(-20,20);*/
 
-    this.transform.position = new Vector3(randomPointX,0,randomPointZ);
+    this.transform.position = GameManager.instance.PickRespawnPoint();
     transform.GetComponent<PlayerMovementCtrlr>().enabled = true;
 
     photonView.RPC("RegainHealth", RpcTarget.AllBuffered);
