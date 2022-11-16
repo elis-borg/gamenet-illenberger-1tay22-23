@@ -47,6 +47,17 @@ namespace Photon.Chat
 
         private const byte HttpForwardWebFlag = 0x01;
 
+        /// <summary>Enables a fallback to another protocol in case a connect to the Name Server fails.</summary>
+        /// <remarks>
+        /// When connecting to the Name Server fails for a first time, the client will select an alternative
+        /// network protocol and re-try to connect.
+        ///
+        /// The fallback will use the default Name Server port as defined by ProtocolToNameServerPort.
+        ///
+        /// The fallback for TCP is UDP. All other protocols fallback to TCP.
+        /// </remarks>
+        public bool EnableProtocolFallback { get; set; }
+
         /// <summary>The address of last connected Name Server.</summary>
         public string NameServerAddress { get; private set; }
 
@@ -62,6 +73,22 @@ namespace Photon.Chat
             get { return this.chatRegion; }
             set { this.chatRegion = value; }
         }
+
+        /// <summary>
+        /// Defines a proxy URL for WebSocket connections. Can be the proxy or point to a .pac file.
+        /// </summary>
+        /// <remarks>
+        /// This URL supports various definitions:
+        ///
+        /// "user:pass@proxyaddress:port"<br/>
+        /// "proxyaddress:port"<br/>
+        /// "system:"<br/>
+        /// "pac:"<br/>
+        /// "pac:http://host/path/pacfile.pac"<br/>
+        ///
+        /// Important: Don't define a protocol, except to point to a pac file. the proxy address should not begin with http:// or https://.
+        /// </remarks>
+        public string ProxyServerAddress;
 
         /// <summary>Current state of the ChatClient. Also use CanChat.</summary>
         public ChatState State { get; private set; }
@@ -129,6 +156,16 @@ namespace Photon.Chat
         /// Changing this value, does not affect ChatChannels that are already in use!
         /// </remarks>
         public int MessageLimit;
+
+        /// <summary>Limits the number of messages from private channel histories.</summary>
+        /// <remarks>
+        /// This is applied to all private channels on reconnect, as there is no explicit re-joining private channels.<br/>
+        /// Default is -1, which gets available messages up to a maximum set by the server.<br/>
+        /// A value of 0 gets you zero messages.<br/>
+        /// The server's limit of messages may be lower. If so, the server's value will overrule this.<br/>
+        /// </remarks>
+        public int PrivateChatHistoryLength = -1;
+
         /// <summary> Public channels this client is subscribed to. </summary>
         public readonly Dictionary<string, ChatChannel> PublicChannels;
         /// <summary> Private channels in which this client has exchanged messages. </summary>
@@ -210,6 +247,7 @@ namespace Photon.Chat
             this.PublicChannelsUnsubscribing = new HashSet<string>();
         }
 
+
         public bool ConnectUsingSettings(ChatAppSettings appSettings)
         {
             if (appSettings == null)
@@ -226,18 +264,25 @@ namespace Photon.Chat
             this.DebugOut = appSettings.NetworkLogging;
 
             this.TransportProtocol = appSettings.Protocol;
+            this.EnableProtocolFallback = appSettings.EnableProtocolFallback;
 
             if (!appSettings.IsDefaultNameServer)
             {
                 this.chatPeer.NameServerHost = appSettings.Server;
+                this.chatPeer.NameServerPortOverride = appSettings.Port;
             }
+            
+            this.ProxyServerAddress = appSettings.ProxyServer;
 
-            return this.Connect(appSettings.AppId, appSettings.AppVersion, this.AuthValues);
+            return this.Connect(appSettings.AppIdChat, appSettings.AppVersion, this.AuthValues);
         }
 
         /// <summary>
         /// Connects this client to the Photon Chat Cloud service, which will also authenticate the user (and set a UserId).
         /// </summary>
+        /// <remarks>
+        /// The ProxyServerAddress is used to connect. Set it before calling this method or use ConnectUsingSettings.
+        /// </remarks>
         /// <param name="appId">Get your Photon Chat AppId from the <a href="https://dashboard.photonengine.com">Dashboard</a>.</param>
         /// <param name="appVersion">Any version string you make up. Used to separate users and variants of your clients, which might be incompatible.</param>
         /// <param name="authValues">Values for authentication. You can leave this null, if you set a UserId before. If you set authValues, they will override any UserId set before.</param>
@@ -247,7 +292,10 @@ namespace Photon.Chat
             this.chatPeer.TimePingInterval = 3000;
             this.DisconnectedCause = ChatDisconnectCause.None;
 
-            this.AuthValues = authValues;
+            if (authValues != null)
+            {
+                this.AuthValues = authValues;
+            }
 
             this.AppId = appId;
             this.AppVersion = appVersion;
@@ -269,7 +317,8 @@ namespace Photon.Chat
             #endif
 
             this.NameServerAddress = this.chatPeer.NameServerAddress;
-            bool isConnecting = this.chatPeer.Connect();
+
+            bool isConnecting = this.chatPeer.Connect(this.NameServerAddress, this.ProxyServerAddress, "NameServer", null);
             if (isConnecting)
             {
                 this.State = ChatState.ConnectingToNameServer;
@@ -1046,6 +1095,15 @@ namespace Photon.Chat
                 case StatusCode.Disconnect:
                     switch (this.State)
                     {
+                        case ChatState.ConnectWithFallbackProtocol:
+                            this.EnableProtocolFallback = false;        // the client does a fallback only one time
+                            this.chatPeer.NameServerPortOverride = 0;   // resets a value in the peer only (as we change the protocol, the port has to change, too)
+                            this.chatPeer.TransportProtocol = (this.chatPeer.TransportProtocol == ConnectionProtocol.Tcp) ? ConnectionProtocol.Udp : ConnectionProtocol.Tcp;
+                            this.Connect(this.AppId, this.AppVersion, null);
+
+                            // the client now has to return, instead of break, to avoid further processing of the disconnect call
+                            return;
+
                         case ChatState.Authenticated:
                             this.ConnectToFrontEnd();
                             // client disconnected from nameserver after authentication
@@ -1078,7 +1136,18 @@ namespace Photon.Chat
                 case StatusCode.ExceptionOnConnect:
                 case StatusCode.SecurityExceptionOnConnect:
                 case StatusCode.EncryptionFailedToEstablish:
-                    this.Disconnect(ChatDisconnectCause.ExceptionOnConnect);
+                    this.DisconnectedCause = ChatDisconnectCause.ExceptionOnConnect;
+
+                    // if enabled, the client can attempt to connect with another networking-protocol to check if that connects
+                    if (this.EnableProtocolFallback && this.State == ChatState.ConnectingToNameServer)
+                    {
+                        this.State = ChatState.ConnectWithFallbackProtocol;
+                    }
+                    else
+                    {
+                        this.Disconnect(ChatDisconnectCause.ExceptionOnConnect);
+                    }
+
                     break;
                 case StatusCode.Exception:
                 case StatusCode.ExceptionOnReceive:
@@ -1094,7 +1163,17 @@ namespace Photon.Chat
                     this.Disconnect(ChatDisconnectCause.DisconnectByServerReasonUnknown);
                     break;
                 case StatusCode.TimeoutDisconnect:
-                    this.Disconnect(ChatDisconnectCause.ClientTimeout);
+                    this.DisconnectedCause = ChatDisconnectCause.ClientTimeout;
+
+                    // if enabled, the client can attempt to connect with another networking-protocol to check if that connects
+                    if (this.EnableProtocolFallback && this.State == ChatState.ConnectingToNameServer)
+                    {
+                        this.State = ChatState.ConnectWithFallbackProtocol;
+                    }
+                    else
+                    {
+                        this.Disconnect(ChatDisconnectCause.ClientTimeout);
+                    }
                     break;
             }
         }
@@ -1136,7 +1215,7 @@ namespace Photon.Chat
         {
             if (!this.didAuthenticate)
             {
-                this.didAuthenticate = this.chatPeer.AuthenticateOnNameServer(this.AppId, this.AppVersion, this.chatRegion, this.AuthValues);
+                this.didAuthenticate = this.chatPeer.AuthenticateOnNameServer(this.AppId, this.AppVersion, this.ChatRegion, this.AuthValues);
                 if (!this.didAuthenticate)
                 {
                     if (this.DebugOut >= DebugLevel.ERROR)
@@ -1236,7 +1315,7 @@ namespace Photon.Chat
                     }
                     if (channel.PublishSubscribers) // or maybe remove check & always add anyway?
                     {
-                        channel.Subscribers.Add(this.UserId);
+                        channel.AddSubscriber(this.UserId);
                     }
                     if (eventData.Parameters.TryGetValue(ChatParameterCode.ChannelSubscribers, out temp))
                     {
@@ -1246,10 +1325,11 @@ namespace Photon.Chat
                     #if CHAT_EXTENDED
                     if (eventData.Parameters.TryGetValue(ChatParameterCode.UserProperties, out temp))
                     {
-                        Dictionary<string, Dictionary<object, object>> userProperties = temp as Dictionary<string, Dictionary<object, object>>;
+                        //UnityEngine.Debug.LogFormat("temp = {0}", temp);
+                        Dictionary<string, object> userProperties = temp as Dictionary<string, object>;
                         foreach (var pair in userProperties)
                         {
-                            channel.ReadUserProperties(pair.Key, pair.Value);
+                            channel.ReadUserProperties(pair.Key, pair.Value as Dictionary<object, object>);
                         }
                     }
                     #endif
@@ -1397,7 +1477,7 @@ namespace Photon.Chat
             }
             #endif
 
-            if (!this.chatPeer.Connect(this.FrontendAddress, ChatAppName))
+            if (!this.chatPeer.Connect(this.FrontendAddress, this.ProxyServerAddress, ChatAppName, null))
             {
                 if (this.DebugOut >= DebugLevel.ERROR)
                 {
@@ -1413,17 +1493,22 @@ namespace Photon.Chat
         {
             if (this.AuthValues != null)
             {
-                if (string.IsNullOrEmpty(this.AuthValues.Token))
+                if (this.AuthValues.Token == null)
                 {
                     if (this.DebugOut >= DebugLevel.ERROR)
                     {
-                        this.listener.DebugReturn(DebugLevel.ERROR, "Can't authenticate on front end server. Secret is not set");
+                        this.listener.DebugReturn(DebugLevel.ERROR, "Can't authenticate on front end server. Secret (AuthValues.Token) is not set");
                     }
                     return false;
                 }
                 else
                 {
                     Dictionary<byte, object> opParameters = new Dictionary<byte, object> { { (byte)ChatParameterCode.Secret, this.AuthValues.Token } };
+                    if (this.PrivateChatHistoryLength > -1)
+                    {
+                        opParameters[(byte)ChatParameterCode.HistoryLength] = this.PrivateChatHistoryLength;
+                    }
+
                     return this.chatPeer.SendOperation(ChatOperationCode.Authenticate, opParameters, SendOptions.SendReliable);
                 }
             }
@@ -1451,7 +1536,7 @@ namespace Photon.Chat
                         this.listener.DebugReturn(DebugLevel.WARNING, string.Format("Channel \"{0}\" for incoming UserUnsubscribed (\"{1}\") event does not have PublishSubscribers enabled.", channelName, userId));
                     }
                 }
-                if (!channel.Subscribers.Remove(userId)) // user not found!
+                if (!channel.RemoveSubscriber(userId)) // user not found!
                 {
                     if (this.DebugOut >= DebugLevel.WARNING)
                     {
@@ -1471,8 +1556,6 @@ namespace Photon.Chat
 
         private void HandleUserSubscribedEvent(EventData eventData)
         {
-            //TODO: Handle user properties!
-
             string channelName = eventData.Parameters[ChatParameterCode.Channel] as string;
             string userId = eventData.Parameters[ChatParameterCode.UserId] as string;
             ChatChannel channel;
@@ -1485,7 +1568,7 @@ namespace Photon.Chat
                         this.listener.DebugReturn(DebugLevel.WARNING, string.Format("Channel \"{0}\" for incoming UserSubscribed (\"{1}\") event does not have PublishSubscribers enabled.", channelName, userId));
                     }
                 }
-                if (!channel.Subscribers.Add(userId)) // user came back from the dead ?
+                if (!channel.AddSubscriber(userId)) // user came back from the dead ?
                 {
                     if (this.DebugOut >= DebugLevel.WARNING)
                     {
@@ -1499,6 +1582,14 @@ namespace Photon.Chat
                         this.listener.DebugReturn(DebugLevel.WARNING, string.Format("Channel \"{0}\"'s MaxSubscribers exceeded. count={1} > MaxSubscribers={2}.", channelName, channel.Subscribers.Count, channel.MaxSubscribers));
                     }
                 }
+                #if CHAT_EXTENDED
+                object temp;
+                if (eventData.Parameters.TryGetValue(ChatParameterCode.UserProperties, out temp))
+                {
+                    Dictionary<object, object> userProperties = temp as Dictionary<object, object>;
+                    channel.ReadUserProperties(userId, userProperties);
+                }
+                #endif
             }
             else
             {
@@ -1517,7 +1608,7 @@ namespace Photon.Chat
         /// </summary>
         /// <param name="channel">name of the channel to subscribe to</param>
         /// <param name="lastMsgId">ID of the last received message from this channel when re subscribing to receive only missed messages, default is 0</param>
-        /// <param name="messagesFromHistory">how many missed messages to receive from history, default is none/-1</param>
+        /// <param name="messagesFromHistory">how many missed messages to receive from history, default is -1 (available history). 0 will get you no items. Positive values are capped by a server side limit.</param>
         /// <param name="creationOptions">options to be used in case the channel to subscribe to will be created.</param>
         /// <returns></returns>
         public bool Subscribe(string channel, int lastMsgId = 0, int messagesFromHistory = -1, ChannelCreationOptions creationOptions = null)
@@ -1686,7 +1777,7 @@ namespace Photon.Chat
             }
             return this.SetUserProperties(channelName, userId, null);
         }
-        
+
         internal bool SetUserProperties(string channelName, string userId, Dictionary<object, object> channelProperties, Dictionary<object, object> expectedProperties = null, bool httpForward = false)
         {
             if (!this.CanChat)
