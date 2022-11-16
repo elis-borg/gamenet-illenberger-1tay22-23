@@ -100,11 +100,18 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 
     public void OnJoinRandomRoomClicked(string gameMode)
     {
+      GameMode = gameMode;
+
       //when create room expecting customproperties embedded in it
       ExitGames.Client.Photon.Hashtable expectedCustomRoomProperties = new ExitGames.Client.Photon.Hashtable() {{"gm", gameMode}};
       //joining random room based on mode selected,
       PhotonNetwork.JoinRandomRoom(expectedCustomRoomProperties, 0); //will have an error since u need another overload method, just set to 0 if we dont to put max. players
       //if no room yet just override with OnJoinRandomFailed
+    }
+
+    public void OnBackButtonClicked()
+    {
+      ActivatePanel(GameOptionsUIPanel.name);
     }
     //#endregion
 
@@ -128,7 +135,9 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
       Debug.Log(PhotonNetwork.LocalPlayer.NickName + "has joined the " + PhotonNetwork.CurrentRoom.Name);
+      Debug.Log("Playercount: " + PhotonNetwork.CurrentRoom.PlayerCount);
 
+      ActivatePanel(InsideRoomUIPanel.name);
       //which gm has been set
       //2nd paramenter of TryGetValue is an object type so need to make its type
       object gameModeName;
@@ -137,9 +146,31 @@ public class NetworkManager : MonoBehaviourPunCallbacks
       }
     }
 
-    public override void OnJoinRandomFailed()
+    public override void OnJoinRandomFailed(short returnCode, string message)
     {
       Debug.Log(message);
+
+      if(GameMode != null){ //null guard
+
+        string roomName = RoomNameInputField.text;
+
+        if (string.IsNullOrEmpty(roomName))
+        {
+            roomName = "Room " + Random.Range(1000, 10000);
+        }
+
+        RoomOptions roomOptions = new RoomOptions(); //photon.realtime
+        string[] roomPropertiesInLobby = {"gm"}; //gm = game mode
+        /*custom property for room, tho gm doesn't contain anything for now will need a hash table
+        similar to dictionary and contains a key (gm), value would be whatever gamemode selected*/
+
+        //gm is set to rc by default, rc = racing, dr = death race, previous parameter {gm, rc}
+        ExitGames.Client.Photon.Hashtable customRoomProperties = new ExitGames.Client.Photon.Hashtable() {{"gm", GameMode}};
+
+        roomOptions.CustomRoomPropertiesForLobby = roomPropertiesInLobby;
+        roomOptions.CustomRoomProperties = customRoomProperties;
+        PhotonNetwork.CreateRoom(roomName, roomOptions); //new (2nd) parameter for room options, usually just roomName
+      }
     }
 
     //#endregion
@@ -153,6 +184,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
         CreateRoomUIPanel.SetActive(CreateRoomUIPanel.name.Equals(panelNameToBeActivated));
         GameOptionsUIPanel.SetActive(GameOptionsUIPanel.name.Equals(panelNameToBeActivated));
         JoinRandomRoomUIPanel.SetActive(JoinRandomRoomUIPanel.name.Equals(panelNameToBeActivated));
+        InsideRoomUIPanel.SetActive(InsideRoomUIPanel.name.Equals(panelNameToBeActivated));
     }
 
     public void SetGameMode(string gameMode)
