@@ -28,10 +28,9 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 
     [Header("Inside Room Panel")]
     public GameObject InsideRoomUIPanel;
-    public Text RoomInfoTxt;
-    public GameObject PlayerListPrefab;
-    public GameObject PlayerListParent;
-    public GameObject StartGameBtn;
+    public Text RoomInfoTxt, GameModeTxt;
+    public GameObject PlayerListPrefab, PlayerListParent,
+          StartGameBtn;
 
     [Header("Join Random Room Panel")]
     public GameObject JoinRandomRoomUIPanel;
@@ -43,6 +42,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     void Start()
     {
         ActivatePanel(LoginUIPanel.name);
+        PhotonNetwork.AutomaticallySyncScene = true; //all the other players in that room will also load that specific scene
     }
 
     // Update is called once per frame
@@ -125,6 +125,18 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     {
       PhotonNetwork.LeaveRoom();
     }
+
+    public void OnStartGameButtonClicked()
+    {
+      if(PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey("gm")){
+        if(PhotonNetwork.CurrentRoom.CustomProperties.ContainsValue("rc")){ //initialize racing gm
+          PhotonNetwork.LoadLevel("RacingScene");
+        }
+        else if(PhotonNetwork.CurrentRoom.CustomProperties.ContainsValue("dr")){ //initialize deathracing gm
+          PhotonNetwork.LoadLevel("DeathRaceScene");
+        }
+      }
+    }
     //#endregion
 
     //#region Photon Callbacks
@@ -158,6 +170,12 @@ public class NetworkManager : MonoBehaviourPunCallbacks
         RoomInfoTxt.text = "Room name: " + PhotonNetwork.CurrentRoom.Name + " " + PhotonNetwork.CurrentRoom.PlayerCount + "/"
           + PhotonNetwork.CurrentRoom.MaxPlayers;
 
+        if(PhotonNetwork.CurrentRoom.CustomProperties.ContainsValue("rc")){
+          GameModeTxt.text = "Racing Mode";
+        }
+        else if(PhotonNetwork.CurrentRoom.CustomProperties.ContainsValue("dr")){
+          GameModeTxt.text = "Death Race Mode";
+        }
       }
 
       if(playerListGameObjs == null){

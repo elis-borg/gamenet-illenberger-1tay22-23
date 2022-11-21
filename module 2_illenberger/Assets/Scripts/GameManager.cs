@@ -31,12 +31,14 @@ public class GameManager : MonoBehaviourPunCallbacks
     void Start()
     {
       spawnPoints = GameObject.FindGameObjectsWithTag("Respawn");
-      isGameover = false; 
+      isGameover = false;
 
       if(PhotonNetwork.IsConnectedAndReady){
         Vector3 spawn = PickRespawnPoint();
         PhotonNetwork.Instantiate(playerPrefab.name, spawn, Quaternion.identity);
       }
+
+      PhotonNetwork.AutomaticallySyncScene = true; //hopefully fixes the player being left in the room thingy after game finishes
     }
 
     // Update is called once per frame
