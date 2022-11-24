@@ -15,7 +15,8 @@ public class LapController : MonoBehaviourPunCallbacks
       WhoFinishedEventCode = 0
     }
 
-    private int finishOrder = 0;
+    private int finishOrder = 0,
+                playersDone;
 
     private void OnEnable()
     {
@@ -78,6 +79,7 @@ public class LapController : MonoBehaviourPunCallbacks
       GetComponent<VehicleMovement>().enabled = false;
 
       finishOrder++; //needs to be incremented
+      playersDone++;
 
       string nickName = photonView.Owner.NickName;
       int viewId = photonView.ViewID; //also send it in the object below, for the purposes of seeing current standing in realtime in the canvas
@@ -97,5 +99,7 @@ public class LapController : MonoBehaviourPunCallbacks
       };
 
       PhotonNetwork.RaiseEvent((byte) RaiseEventsCode.WhoFinishedEventCode, data, raiseEventOpts, sendOption); //pass the parameters data and raiseeventoptions, last parameter is send options
+
+      if(playersDone == PhotonNetwork.CurrentRoom.PlayerCount) RacingGameManager.instance.Gameover(); //alternative win condition
     }
 }

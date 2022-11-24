@@ -8,7 +8,8 @@ public class CountdownManager : MonoBehaviourPunCallbacks
 {   //make sure ur game manager is a singleton first
     public Text timerTxt;
 
-    public float timeToStartRace = 5.0f;
+    //[SerializeField]
+    private float timeToStartRace = 3.0f;
     // Start is called before the first frame update
     void Start()
     {
