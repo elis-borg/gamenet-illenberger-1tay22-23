@@ -10,6 +10,7 @@ public class CountdownManager : MonoBehaviourPunCallbacks
 
     //[SerializeField]
     private float timeToStartRace = 3.0f;
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -40,6 +41,7 @@ public class CountdownManager : MonoBehaviourPunCallbacks
     public void StartRace()
     { //go back to vehicle movement and add isControlEnabled bool
       GetComponent<VehicleMovement>().isControlEnabled = true;
+      GetComponent<PlayerSetup>().playerUi.transform.Find("FireBtn").GetComponent<Button>().interactable = true;
       this.enabled = false;
     }
 }

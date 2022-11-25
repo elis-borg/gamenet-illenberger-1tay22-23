@@ -8,17 +8,21 @@ public class Shooting : MonoBehaviourPunCallbacks
 {
     public Camera camera;
     public GameObject projectileFXPrefab,
-                      projectilePrefab,
-                      laserFXPrefab;
+                      projectilePrefab;
 
     public Transform turretOrigin;
 
-    public float gunRange = 50f,
-                laserDuration = 0.05f,
-                projectileSpeed;
+    [Header ("Gun Settings")]
+    public float gunRange = 200f;
+    public float laserDuration = 0.5f;
+    public float fireRate = 1.0f;
+    public float fireCooldown;
+    public float projectileSpeed;
+
+    private LineRenderer laserLine;
 
     [Header ("Player Stats")]
-    public float startHealth = 100;
+    public float startHealth = 500;
     private float health;
     public Image healthbar;
     public bool isLaserWeapon = true; //determine if vehicle is of projectile or laser variety;
@@ -28,62 +32,65 @@ public class Shooting : MonoBehaviourPunCallbacks
     {
       health = startHealth;
       healthbar.fillAmount = health / startHealth;
+
       if(isLaserWeapon){
-        //laserLine = GetComponent<LineRenderer>();
+        //laserLine = GameObject.Find("Laser").transform.GetChild(3).GetComponent<LineRenderer>();
+        laserLine = turretOrigin.GetComponent<LineRenderer>();
       }
     }
 
-    // Update is called once per frame
     void Update()
     {
-
+      if(fireCooldown > 0) fireCooldown -= Time.deltaTime;
     }
 
     public void Fire()
     {
-      if(isLaserWeapon){
-        RaycastHit hit;
-        //Ray ray = camera.ViewportPointToRay(new Vector3(0.5f, 0.5f));
+      if(fireCooldown <= 0){ //not on cooldown
+        if(isLaserWeapon){
+          RaycastHit hit;
+          //Ray ray = camera.ViewportPointToRay(new Vector3(0.5f, 0.5f));
+          Ray ray = new Ray (turretOrigin.transform.position, turretOrigin.transform.forward);
 
-        if (Physics.Raycast(turretOrigin.transform.position, turretOrigin.transform.forward, out hit, 200)){
-          Debug.Log(hit.collider.gameObject.name);
-          Debug.DrawRay(turretOrigin.transform.position, turretOrigin.transform.forward * hit.distance, Color.yellow); //u can only view this in scene!
+          laserLine.SetPosition(0, turretOrigin.position);
 
-          photonView.RPC("CreateHitFX", RpcTarget.All, hit.point);
+          if (Physics.Raycast(ray, out hit, gunRange)){
+            Debug.Log(hit.collider.gameObject.name);
+            //Debug.DrawRay(turretOrigin.transform.position, turretOrigin.transform.forward * hit.distance, Color.yellow); //u can only view this in scene!
 
-          if (hit.collider.gameObject.CompareTag("Player") && !hit.collider.gameObject.GetComponent<PhotonView>().IsMine){
-            //need to call an rpc function to deduct the playerhealth for every hit
-            hit.collider.gameObject.GetComponent<PhotonView>().RPC("TakeDamage", RpcTarget.AllBuffered, 25);
-            Debug.Log("Called TakeDamage();");
+            laserLine.SetPosition(1, hit.point);
+            photonView.RPC("CreateHitFX", RpcTarget.All, hit.point);
+
+            if (hit.collider.gameObject.CompareTag("Player") && !hit.collider.gameObject.GetComponent<PhotonView>().IsMine){
+              hit.collider.gameObject.GetComponent<PhotonView>().RPC("TakeDamage", RpcTarget.AllBuffered, 25);
+            }
           }
+          else{
+            laserLine.SetPosition(1,turretOrigin.transform.position + turretOrigin.transform.forward * gunRange); //limited beam of light
+          }
+          StartCoroutine(ShootLaser());
+        }
+        else{
+          photonView.RPC("ShootProjectile", RpcTarget.All);
         }
       }
-      else{
-        GameObject p = Instantiate(projectilePrefab, turretOrigin.transform.position, turretOrigin.transform.rotation);
-        Physics.IgnoreCollision(p.GetComponent<Collider>(), this.GetComponent<Collider>());
-        //b.GetComponent<Bullet>().source = this.gameObject;
-        p.GetComponent<Rigidbody>().AddForce(turretOrigin.transform.forward*projectileSpeed);
-      }
-
     }
 
     [PunRPC]
     public void TakeDamage(int damage, PhotonMessageInfo info)
     {
       this.health -= damage;
-      this.healthbar.fillAmount = health/startHealth;
+      this.healthbar.fillAmount = health/startHealth; //when copying dont forget to put image source for ur fillbar
 
       if(health <= 0){
         Die();
         string victimName = photonView.Owner.NickName,
                killerName = info.Sender.NickName;
 
-
         photonView.RPC("KillerNotification", RpcTarget.All, victimName, killerName); //gives everyone a copy version
       }
     }
 
-    //make particle fx apparent thruout the whole server
     [PunRPC]
     public void CreateHitFX (Vector3 position)
     {
@@ -93,9 +100,27 @@ public class Shooting : MonoBehaviourPunCallbacks
 
     public void Die(){
       if(photonView.IsMine){
+        GameObject deadTxt = GameObject.Find("DeadTxt");
 
-        //StartCoroutine(RespawnCountdown());
+
+        transform.GetComponent<VehicleMovement>().enabled = false;
+        deadTxt.GetComponent<Text>().text = "You were eliminated from the race.";
+        Destroy(this.gameObject); //delete car
+
+        //insert code for spectator here
       }
+    }
+
+    [PunRPC]
+    public void ShootProjectile()
+    {
+      GameObject p = PhotonNetwork.Instantiate(projectilePrefab.name, turretOrigin.transform.position, turretOrigin.transform.rotation*Quaternion.identity);
+      Debug.Log("Projectile created.");
+      Physics.IgnoreCollision(p.GetComponent<Collider>(), this.GetComponent<Collider>());
+      p.GetComponent<Projectile>().source = this.gameObject;
+      p.GetComponent<Rigidbody>().AddForce(turretOrigin.transform.forward*projectileSpeed);
+
+      Destroy(p,2f); //to clear memory
     }
 
   [PunRPC]
@@ -109,14 +134,11 @@ public class Shooting : MonoBehaviourPunCallbacks
       yield return new WaitForSeconds(1.0f);
       ejectTime--;
 
-      this.transform.GetComponent<PlayerSetup>().playerUiPrefab.transform.Find("FireBtn").GetComponent<Button>().enabled = false; //walk freely but no more firing
+      this.transform.GetComponent<PlayerSetup>().playerUiPrefab.transform.Find("FireBtn").GetComponent<Button>().interactable = false; //walk freely but no more firing
 
-      winnerImg.transform.Find("Winner").GetComponent<Text>().text = winner + " won the match!";
-      winnerImg.transform.Find("RespawnTimer").GetComponent<Text>().text = "Returning to lobby in " + ejectTime.ToString(".00");
+      winnerImg.transform.Find("Winner").GetComponent<Text>().text = winner + " is the last racer standing!";
     }
-    //GameManager.instance.WinnerDetermined(); //other player doesnt get booted due to lag between countdowns but it should work
-    //GameManager.instance.killcountRoom();
-    //RacingGameManager.instance.Gameover();
+    RacingGameManager.instance.Gameover();
   }
 
   [PunRPC]
@@ -130,9 +152,16 @@ public class Shooting : MonoBehaviourPunCallbacks
       yield return new WaitForSeconds(1.0f);
       displayTime--;
 
-      killerImg.transform.Find("Text").GetComponent<Text>().text = victim  + " was tactically nuked by " + killer;
+      killerImg.transform.Find("Text").GetComponent<Text>().text = victim  + "'s vehicle was shot down by " + killer;
     }
     killerImg.transform.Find("Text").GetComponent<Text>().text = "";
     killerImg.GetComponent<Image>().enabled = false;
+  }
+
+  IEnumerator ShootLaser()
+  {
+    laserLine.enabled = true;
+    yield return new WaitForSeconds(laserDuration);
+    laserLine.enabled = false;
   }
 }

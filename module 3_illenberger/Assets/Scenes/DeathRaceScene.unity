@@ -956,6 +956,8 @@ MonoBehaviour:
   - {fileID: 427814409}
   - {fileID: 1300576908}
   - {fileID: 1947761038}
+  playerList: []
+  isGameover: 0
 --- !u!4 &1145594236
 Transform:
   m_ObjectHideFlags: 0

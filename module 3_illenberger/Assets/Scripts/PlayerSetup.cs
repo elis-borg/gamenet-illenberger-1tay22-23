@@ -9,12 +9,15 @@ public class PlayerSetup : MonoBehaviourPunCallbacks
 {
     public Camera camera;
 
-    public GameObject playerUiPrefab;
+    public GameObject playerUiPrefab,
+                      playerUi;
 
     [SerializeField]
     TextMeshProUGUI playerNameText;
 
     private Shooting shooting;
+
+    public bool shootingEnabled = false;
 
     // Start is called before the first frame update
     void Start()
@@ -34,7 +37,8 @@ public class PlayerSetup : MonoBehaviourPunCallbacks
           shooting = this.GetComponent<Shooting>();
 
           if(photonView.IsMine){
-            GameObject playerUi = Instantiate(playerUiPrefab);
+            playerUi = Instantiate(playerUiPrefab);
+
             playerUi.transform.Find("QuitBtn").GetComponent<Button>().onClick.AddListener(() => RacingGameManager.instance.LeaveRoom());
             //dont forget to do leftroom override in manager and load lobby scene.
             playerUi.transform.Find("FireBtn").GetComponent<Button>().onClick.AddListener(() => shooting.Fire());

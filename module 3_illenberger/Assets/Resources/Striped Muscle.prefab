@@ -890,7 +890,6 @@ GameObject:
   - component: {fileID: -8903653917893333455}
   - component: {fileID: -4891991974744434131}
   - component: {fileID: 7501584969558485166}
-  - component: {fileID: 8117771638335842888}
   m_Layer: 0
   m_Name: Striped Muscle
   m_TagString: Player
@@ -1018,7 +1017,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   camera: {fileID: 0}
   playerUiPrefab: {fileID: 606145651540961016, guid: 298a993655321d34b915c248609ae536, type: 3}
+  playerUi: {fileID: 0}
   playerNameText: {fileID: 2199379033845724920}
+  shootingEnabled: 0
 --- !u!114 &-8903653917893333455
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1032,6 +1033,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   timerTxt: {fileID: 0}
+  fireButton: {fileID: 0}
 --- !u!114 &-4891991974744434131
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1059,113 +1061,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   camera: {fileID: 9200600017957782021}
   projectileFXPrefab: {fileID: 9014551003606136187, guid: c5e8689ef28790344b33bfcd3cb364dd, type: 3}
-  projectilePrefab: {fileID: 1605608762714494, guid: ba82ee92e1ad49a49a80b733d3386209, type: 3}
-  laserFXPrefab: {fileID: 0}
+  projectilePrefab: {fileID: 6804990658058999119, guid: 95d81965bc5542b43a5628d6d09f379c, type: 3}
   turretOrigin: {fileID: 5083423529093307594}
   gunRange: 50
   laserDuration: 0.05
-  projectileSpeed: 1000
-  startHealth: 100
-  healthbar: {fileID: 7051360785865751359}
+  fireRate: 0
+  fireCooldown: 0
+  projectileSpeed: 1500
+  startHealth: 500
+  healthbar: {fileID: 6103360244216155832}
   isLaserWeapon: 0
---- !u!120 &8117771638335842888
-LineRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4977972796935790845}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_MotionVectors: 0
-  m_LightProbeUsage: 0
-  m_ReflectionProbeUsage: 0
-  m_RayTracingMode: 0
-  m_RayTraceProcedural: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 0}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_Positions:
-  - {x: 0, y: 0, z: 0}
-  - {x: 0, y: 0, z: 1}
-  m_Parameters:
-    serializedVersion: 3
-    widthMultiplier: 1
-    widthCurve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 1
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    colorGradient:
-      serializedVersion: 2
-      key0: {r: 1, g: 1, b: 1, a: 1}
-      key1: {r: 1, g: 1, b: 1, a: 1}
-      key2: {r: 0, g: 0, b: 0, a: 0}
-      key3: {r: 0, g: 0, b: 0, a: 0}
-      key4: {r: 0, g: 0, b: 0, a: 0}
-      key5: {r: 0, g: 0, b: 0, a: 0}
-      key6: {r: 0, g: 0, b: 0, a: 0}
-      key7: {r: 0, g: 0, b: 0, a: 0}
-      ctime0: 0
-      ctime1: 65535
-      ctime2: 0
-      ctime3: 0
-      ctime4: 0
-      ctime5: 0
-      ctime6: 0
-      ctime7: 0
-      atime0: 0
-      atime1: 65535
-      atime2: 0
-      atime3: 0
-      atime4: 0
-      atime5: 0
-      atime6: 0
-      atime7: 0
-      m_Mode: 0
-      m_NumColorKeys: 2
-      m_NumAlphaKeys: 2
-    numCornerVertices: 0
-    numCapVertices: 0
-    alignment: 0
-    textureMode: 0
-    shadowBias: 0.5
-    generateLightingData: 0
-  m_UseWorldSpace: 1
-  m_Loop: 0
 --- !u!1 &4977972796935790847
 GameObject:
   m_ObjectHideFlags: 0
