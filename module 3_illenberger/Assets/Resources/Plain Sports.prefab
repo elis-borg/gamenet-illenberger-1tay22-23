@@ -826,7 +826,7 @@ MonoBehaviour:
   gunRange: 50
   laserDuration: 0.05
   fireRate: 1
-  fireCooldown: 0
+  fireCooldown: 3
   projectileSpeed: 0
   startHealth: 500
   healthbar: {fileID: 864054871308149710}

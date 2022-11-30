@@ -10,13 +10,7 @@ public class LapController : MonoBehaviourPunCallbacks
 {
     public List<GameObject> lapTriggers = new List<GameObject>();
 
-    public enum RaiseEventsCode
-    {
-      WhoFinishedEventCode = 0
-    }
-
-    private int finishOrder = 0,
-                playersDone;
+    private int finishOrder = 0;
 
     private void OnEnable()
     {
@@ -30,7 +24,7 @@ public class LapController : MonoBehaviourPunCallbacks
     //on enable and on disable but first add a callback whenever an event is called
     void OnEvent (EventData photonEvent)
     {
-      if(photonEvent.Code == (byte)RaiseEventsCode.WhoFinishedEventCode){
+      if(photonEvent.Code == (byte)Constants.WhoFinishedEventCode){
         //retrieve data that has been passed
         object[] data = (object[]) photonEvent.CustomData;
 
@@ -79,13 +73,13 @@ public class LapController : MonoBehaviourPunCallbacks
       GetComponent<VehicleMovement>().enabled = false;
 
       finishOrder++; //needs to be incremented
-      playersDone++;
+      RacingGameManager.instance.playersDone++;
 
       string nickName = photonView.Owner.NickName;
       int viewId = photonView.ViewID; //also send it in the object below, for the purposes of seeing current standing in realtime in the canvas
 
-      //event data
-      object[] data = new object[] {nickName, finishOrder, viewId}; //will also need ur finishOrder and to store nickname of player who finished, data is the what is gonna be passed to raisevent
+      //#region Event Data
+      object[] data = new object[] {nickName, finishOrder, viewId}; //will also need ur finishOrder and to store nickname of player who finished, data is whats gonna be passed to raisevent
 
       RaiseEventOptions raiseEventOpts = new RaiseEventOptions //initialize below
       {
@@ -98,8 +92,7 @@ public class LapController : MonoBehaviourPunCallbacks
         Reliability = false
       };
 
-      PhotonNetwork.RaiseEvent((byte) RaiseEventsCode.WhoFinishedEventCode, data, raiseEventOpts, sendOption); //pass the parameters data and raiseeventoptions, last parameter is send options
-
-      if(playersDone == PhotonNetwork.CurrentRoom.PlayerCount) RacingGameManager.instance.Gameover(); //alternative win condition
+      PhotonNetwork.RaiseEvent((byte) Constants.WhoFinishedEventCode, data, raiseEventOpts, sendOption); //pass the parameters data and raiseeventoptions, last parameter is send options
+      //#endregion
     }
 }

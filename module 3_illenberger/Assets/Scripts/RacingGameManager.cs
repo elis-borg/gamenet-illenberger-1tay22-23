@@ -11,15 +11,22 @@ public class RacingGameManager : MonoBehaviourPunCallbacks
     public GameObject[] vehiclePrefabs;
     public Transform[] startingPositions;
     public GameObject[] finisherTxtUI;
+    public GameObject[] eliminateeTxtUI;
+    public GameObject winnerTxtUI;
 
     public static RacingGameManager instance = null;
 
     public Text timeTxt;
 
+    public int playersDone;
+
     public List<GameObject> lapTriggers = new List<GameObject>();
     public List<GameObject> playerList = new List<GameObject>();
+    public List<GameObject> deadPlayerList = new List<GameObject>();
 
-    public bool isGameover; //win conditions are either all players make it to the last lap or only one player left in game
+
+    public bool isGameover, //win conditions are either all players make it to the last lap or only one player left in game
+                cdTurnedOff;
 
     void Awake()
     {
@@ -33,6 +40,7 @@ public class RacingGameManager : MonoBehaviourPunCallbacks
     void Start()
     {
         isGameover = false;
+        cdTurnedOff = false;
 
         if(PhotonNetwork.IsConnectedAndReady){
           object playerSelectionNumber;
@@ -42,22 +50,25 @@ public class RacingGameManager : MonoBehaviourPunCallbacks
             Debug.Log(playerSelectionNumber);
 
             int actorNumber = PhotonNetwork.LocalPlayer.ActorNumber;
-            Vector3 instantiatePosition = startingPositions[actorNumber -1].position;
+            Vector3 instantiatePosition = startingPositions[actorNumber-1].position;
             //dont forget to set a starting position in gamescene becos parameters need a position ^
             PhotonNetwork.Instantiate(vehiclePrefabs[(int)playerSelectionNumber].name, instantiatePosition, Quaternion.identity);
           }
         }
 
         foreach (GameObject go in finisherTxtUI) go.SetActive(false);
+        foreach (GameObject go in eliminateeTxtUI) go.SetActive(false);
     }
 
     // Update is called once per frame
     void Update()
     {
-      foreach(GameObject p in GameObject.FindGameObjectsWithTag("Player")) playerList.Add(p);
+      //Debug.Log(PhotonNetwork.CurrentRoom.PlayerCount);
+      //if(playersDone == PhotonNetwork.CurrentRoom.PlayerCount || deadPlayerList.Count == PhotonNetwork.CurrentRoom.PlayerCount-1) isGameover = true;
 
       if(isGameover){
         foreach(GameObject p in playerList) LeaveRoom();
+        foreach(GameObject p in deadPlayerList) LeaveRoom();
       }
     }
 
@@ -74,5 +85,11 @@ public class RacingGameManager : MonoBehaviourPunCallbacks
     public void Gameover()
     {
       isGameover = true;
+    }
+
+    public void RemovePlayer(GameObject deadPlayer)
+    {
+      playerList.Remove(deadPlayer);
+      deadPlayerList.Add(deadPlayer);
     }
 }

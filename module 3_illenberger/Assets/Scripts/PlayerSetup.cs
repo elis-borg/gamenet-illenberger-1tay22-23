@@ -23,6 +23,7 @@ public class PlayerSetup : MonoBehaviourPunCallbacks
     void Start()
     {
         this.camera = transform.Find("Camera").GetComponent<Camera>();
+        RacingGameManager.instance.playerList.Add(this.gameObject);
         playerNameText.text = photonView.Owner.NickName;
 
         if(PhotonNetwork.CurrentRoom.CustomProperties.ContainsValue("rc")){

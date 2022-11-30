@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Photon.Pun;
+using Photon.Realtime; //need to import this to have raiseevent variables
+using ExitGames.Client.Photon; //for send options
 
 public class Shooting : MonoBehaviourPunCallbacks
 {
@@ -17,6 +19,7 @@ public class Shooting : MonoBehaviourPunCallbacks
     public float laserDuration = 0.5f;
     public float fireRate = 1.0f;
     public float fireCooldown;
+    private float currentFireCooldown = 0;
     public float projectileSpeed;
 
     private LineRenderer laserLine;
@@ -24,8 +27,19 @@ public class Shooting : MonoBehaviourPunCallbacks
     [Header ("Player Stats")]
     public float startHealth = 500;
     private float health;
+    private int eliminationOrder;
     public Image healthbar;
     public bool isLaserWeapon = true; //determine if vehicle is of projectile or laser variety;
+
+    private void OnEnable()
+    {
+      PhotonNetwork.NetworkingClient.EventReceived += OnEvent; //this is how to add listeners to all listeners in event
+    }
+
+    private void OnDisable()
+    {
+      PhotonNetwork.NetworkingClient.EventReceived -= OnEvent;
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -41,39 +55,24 @@ public class Shooting : MonoBehaviourPunCallbacks
 
     void Update()
     {
-      if(fireCooldown > 0) fireCooldown -= Time.deltaTime;
+      if(currentFireCooldown > 0) {
+        currentFireCooldown -= Time.deltaTime;
+        GetComponent<PlayerSetup>().playerUi.transform.Find("FireBtn").GetComponent<Button>().interactable = false;
+      }
+      else if(currentFireCooldown <= 0 && RacingGameManager.instance.cdTurnedOff == true) GetComponent<PlayerSetup>().playerUi.transform.Find("FireBtn").GetComponent<Button>().interactable = true;
     }
 
     public void Fire()
     {
-      if(fireCooldown <= 0){ //not on cooldown
+      if(currentFireCooldown <= 0){ //not on cooldown
         if(isLaserWeapon){
-          RaycastHit hit;
-          //Ray ray = camera.ViewportPointToRay(new Vector3(0.5f, 0.5f));
-          Ray ray = new Ray (turretOrigin.transform.position, turretOrigin.transform.forward);
-
-          laserLine.SetPosition(0, turretOrigin.position);
-
-          if (Physics.Raycast(ray, out hit, gunRange)){
-            Debug.Log(hit.collider.gameObject.name);
-            //Debug.DrawRay(turretOrigin.transform.position, turretOrigin.transform.forward * hit.distance, Color.yellow); //u can only view this in scene!
-
-            laserLine.SetPosition(1, hit.point);
-            photonView.RPC("CreateHitFX", RpcTarget.All, hit.point);
-
-            if (hit.collider.gameObject.CompareTag("Player") && !hit.collider.gameObject.GetComponent<PhotonView>().IsMine){
-              hit.collider.gameObject.GetComponent<PhotonView>().RPC("TakeDamage", RpcTarget.AllBuffered, 25);
-            }
-          }
-          else{
-            laserLine.SetPosition(1,turretOrigin.transform.position + turretOrigin.transform.forward * gunRange); //limited beam of light
-          }
-          StartCoroutine(ShootLaser());
+          photonView.RPC("ShootLaser", RpcTarget.All);
         }
         else{
           photonView.RPC("ShootProjectile", RpcTarget.All);
         }
       }
+      currentFireCooldown = fireCooldown;
     }
 
     [PunRPC]
@@ -83,11 +82,11 @@ public class Shooting : MonoBehaviourPunCallbacks
       this.healthbar.fillAmount = health/startHealth; //when copying dont forget to put image source for ur fillbar
 
       if(health <= 0){
-        Die();
         string victimName = photonView.Owner.NickName,
                killerName = info.Sender.NickName;
 
-        photonView.RPC("KillerNotification", RpcTarget.All, victimName, killerName); //gives everyone a copy version
+        Die(victimName, killerName);
+        gameObject.tag = "Dead"; //change game object's tag to dead
       }
     }
 
@@ -98,16 +97,45 @@ public class Shooting : MonoBehaviourPunCallbacks
         Destroy(hitFXGameObj, 0.2f);
     }
 
-    public void Die(){
+    public void Die(string victim, string killer){
+      eliminationOrder++;
+
       if(photonView.IsMine){
+        int viewId = this.photonView.ViewID;
         GameObject deadTxt = GameObject.Find("DeadTxt");
 
-
         transform.GetComponent<VehicleMovement>().enabled = false;
+        GetComponent<PlayerSetup>().playerUi.transform.Find("FireBtn").GetComponent<Button>().interactable = false;
         deadTxt.GetComponent<Text>().text = "You were eliminated from the race.";
-        Destroy(this.gameObject); //delete car
 
-        //insert code for spectator here
+        RacingGameManager.instance.RemovePlayer(this.gameObject); //removes them from playerlist
+
+        //event data for elimination
+        object[] data = new object[] {victim, killer, eliminationOrder, viewId};
+        //event data for winning
+        object[] windata = new object[] {killer};
+
+        RaiseEventOptions raiseEventOpts = new RaiseEventOptions
+        {
+          Receivers = ReceiverGroup.All,
+          CachingOption = EventCaching.AddToRoomCache
+        };
+
+        SendOptions sendOption = new SendOptions
+        {
+          Reliability = false
+        };
+
+        PhotonNetwork.RaiseEvent((byte) Constants.EliminatedWhoEventCode, data, raiseEventOpts, sendOption);
+
+        int remainingPlayersNeededCheck = PhotonNetwork.CurrentRoom.PlayerCount-1;
+        Debug.Log(RacingGameManager.instance.deadPlayerList.Count + "/" + remainingPlayersNeededCheck);
+        if(RacingGameManager.instance.deadPlayerList.Count == PhotonNetwork.CurrentRoom.PlayerCount-1){
+          PhotonNetwork.RaiseEvent((byte) Constants.WhoWonEventCode, windata, raiseEventOpts, sendOption);
+        }
+
+        //insert spectatorcode here
+        //Destroy(this.gameObject); //delete car
       }
     }
 
@@ -115,53 +143,94 @@ public class Shooting : MonoBehaviourPunCallbacks
     public void ShootProjectile()
     {
       GameObject p = PhotonNetwork.Instantiate(projectilePrefab.name, turretOrigin.transform.position, turretOrigin.transform.rotation*Quaternion.identity);
-      Debug.Log("Projectile created.");
       Physics.IgnoreCollision(p.GetComponent<Collider>(), this.GetComponent<Collider>());
       p.GetComponent<Projectile>().source = this.gameObject;
       p.GetComponent<Rigidbody>().AddForce(turretOrigin.transform.forward*projectileSpeed);
 
-      Destroy(p,2f); //to clear memory
+      Destroy(p,2f); //to clear spawned projectiles from memory
     }
 
-  [PunRPC]
-  IEnumerator WinnerAnnouncement(string winner)
-  {
-    GameObject winnerImg = GameObject.Find("WinnerTxt").transform.GetChild(0).gameObject;
-    winnerImg.GetComponent<Image>().enabled = true;
-    float ejectTime = 10.0f;
+    [PunRPC]
+    IEnumerator ShootLaser()
+    {
+      laserLine.enabled = true;
+      laserLine.SetPosition(0, turretOrigin.position);
 
-    while(ejectTime > 0){
-      yield return new WaitForSeconds(1.0f);
-      ejectTime--;
+      RaycastHit hit;
+      Ray ray = new Ray (turretOrigin.transform.position, turretOrigin.transform.forward);
 
-      this.transform.GetComponent<PlayerSetup>().playerUiPrefab.transform.Find("FireBtn").GetComponent<Button>().interactable = false; //walk freely but no more firing
 
-      winnerImg.transform.Find("Winner").GetComponent<Text>().text = winner + " is the last racer standing!";
+      if (Physics.Raycast(ray, out hit, gunRange)){
+        //Debug.Log(hit.collider.gameObject.name);
+        //Debug.DrawRay(turretOrigin.transform.position, turretOrigin.transform.forward * hit.distance, Color.yellow); //u can only view this in scene!
+
+        laserLine.SetPosition(1, hit.point);
+
+        if (hit.collider.gameObject.CompareTag("Player") && !hit.collider.gameObject.GetComponent<PhotonView>().IsMine){
+          hit.collider.gameObject.GetComponent<PhotonView>().RPC("TakeDamage", RpcTarget.AllBuffered, 60);
+        }
+      }
+      else{
+        laserLine.SetPosition(1,turretOrigin.transform.position + turretOrigin.transform.forward * gunRange); //limited beam of light
+      }
+
+      yield return new WaitForSeconds(laserDuration);
+      laserLine.enabled = false;
+      photonView.RPC("CreateHitFX", RpcTarget.All, hit.point);
     }
-    RacingGameManager.instance.Gameover();
-  }
 
-  [PunRPC]
-  IEnumerator KillerNotification(string victim, string killer)
-  {
-    GameObject killerImg = GameObject.Find("KillerTxt").transform.GetChild(0).gameObject;
-    killerImg.GetComponent<Image>().enabled = true;
-    float displayTime = 4.0f;
+    IEnumerator ReturnPlayersToLobby(GameObject wtext)
+    {
+      float leaveRoomTime = 5.0f;
 
-    while(displayTime > 0){
-      yield return new WaitForSeconds(1.0f);
-      displayTime--;
+      while (leaveRoomTime > 0){
+        yield return new WaitForSeconds(1.0f);
+        leaveRoomTime--;
 
-      killerImg.transform.Find("Text").GetComponent<Text>().text = victim  + "'s vehicle was shot down by " + killer;
+        wtext.transform.GetChild(1).GetComponent<Text>().text = "Leaving room in " + leaveRoomTime.ToString(".00") ;
+      }
+      RacingGameManager.instance.Gameover();
     }
-    killerImg.transform.Find("Text").GetComponent<Text>().text = "";
-    killerImg.GetComponent<Image>().enabled = false;
-  }
 
-  IEnumerator ShootLaser()
-  {
-    laserLine.enabled = true;
-    yield return new WaitForSeconds(laserDuration);
-    laserLine.enabled = false;
-  }
+    void OnEvent(EventData photonEvent)
+    {
+      if(photonEvent.Code == (byte)Constants.EliminatedWhoEventCode){
+        object[] data = (object[]) photonEvent.CustomData;
+
+        string vName = (string)data[0],
+              kName = (string)data[1];
+        eliminationOrder = (int)data[2];
+        int viewId = (int)data[3];
+
+        GameObject elimOrderUiTxt = RacingGameManager.instance.eliminateeTxtUI[eliminationOrder-1]; //moves the textbox
+        elimOrderUiTxt.SetActive(true);
+
+        if(viewId == photonView.ViewID) {
+          elimOrderUiTxt.GetComponent<Text>().text = vName + "(YOU) is eliminated by " + kName;
+          elimOrderUiTxt.GetComponent<Text>().color = Color.red;
+        }
+        else{
+          elimOrderUiTxt.GetComponent<Text>().text = vName +  " is eliminated by " + kName;
+        }
+      }
+
+      if(photonEvent.Code == (byte)Constants.WhoWonEventCode){
+        object[] data = (object[]) photonEvent.CustomData;
+
+        string kName = (string)data[0];
+
+        Debug.Log(kName + " is the winner!");
+        //WinnerAnnouncement(kName);
+
+        GameObject winnertxt = RacingGameManager.instance.winnerTxtUI; //moves the textbox
+        winnertxt.GetComponent<Image>().enabled = true;
+
+        winnertxt.transform.GetChild(0).GetComponent<Text>().text = kName + " is the last man standing!";
+        foreach(GameObject go in RacingGameManager.instance.playerList){
+          GetComponent<VehicleMovement>().enabled = false;
+          GetComponent<PlayerSetup>().playerUi.transform.Find("FireBtn").GetComponent<Button>().interactable = false;
+        }
+        StartCoroutine(ReturnPlayersToLobby(winnertxt));
+      }
+    }
 }

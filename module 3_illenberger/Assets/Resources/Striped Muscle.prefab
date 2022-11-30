@@ -1033,7 +1033,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   timerTxt: {fileID: 0}
-  fireButton: {fileID: 0}
 --- !u!114 &-4891991974744434131
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1065,9 +1064,9 @@ MonoBehaviour:
   turretOrigin: {fileID: 5083423529093307594}
   gunRange: 50
   laserDuration: 0.05
-  fireRate: 0
-  fireCooldown: 0
-  projectileSpeed: 1500
+  fireRate: 1
+  fireCooldown: 1.5
+  projectileSpeed: 2500
   startHealth: 500
   healthbar: {fileID: 6103360244216155832}
   isLaserWeapon: 0

@@ -20,12 +20,6 @@ void OnTriggerEnter(Collider col)
       col.GetComponent<Collider>().gameObject.GetComponent<PhotonView>().RPC("TakeDamage", RpcTarget.AllBuffered, projectileDamage);
     }
 
-    /*if (col.gameObject.tag == "Player"){
-      col.gameObject.GetComponent<Shooting>().currentHealth--;
-      float hp = col.gameObject.GetComponent<Shooting>().currentHealth;
-      //Debug.Log("Tank HP left: " + hp);
-    }*/
-
     Destroy(this.gameObject);
   }
 }
