@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 33019746772434282}
   - component: {fileID: 23868049274140838}
   - component: {fileID: 8615602959265392122}
+  - component: {fileID: -5771379292987817682}
   m_Layer: 0
   m_Name: Goat
   m_TagString: Mimic
@@ -96,3 +97,17 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300006, guid: 799f653f08c90c94c8b0126557609836, type: 3}
+--- !u!114 &-5771379292987817682
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1749815345293910}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6feb6a721b9f754fbf7d3452ad6f4a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mName: goat
+  mSpeed: 20

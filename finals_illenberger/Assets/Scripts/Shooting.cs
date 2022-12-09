@@ -151,16 +151,24 @@ public class Shooting : MonoBehaviourPunCallbacks
       Ray ray = camera.ViewportPointToRay(new Vector3(0.5f, 0.5f));
 
       if (Physics.Raycast(ray, out hit, 200)){
-        Debug.Log(hit.collider.gameObject.name);
+        string turnInto = this.GetComponent<MimicHighlight>().animal.GetComponent<Mimic>().mName;
+        GameObject childAnimal = null;
 
         if (hit.collider.gameObject.CompareTag("Mimic")){
           //insert instatiate prefabs of mimicable animal models
-          //GameObject childAnimal = PhotonNetwork.Instantiate(mushroomPrefab.name, mushroomSpawns[lastShroomPoint].GetComponent<Transform>().position, Quaternion.identity);
+
+          //rifle thru gamemanager animal prefabs, find which matches then retrieve the index
+          for(int i = 0; i < GameManager.instance.shifterAnimalPrefabs.Length; i++){
+            if(GameManager.instance.shifterAnimalPrefabs[i].GetComponent<Mimic>().mName == turnInto){
+                childAnimal = PhotonNetwork.Instantiate(GameManager.instance.shifterAnimalPrefabs[i].name, this.transform.position, this.transform.rotation * Quaternion.identity);
+                break;
+              }
+          }
 
           //destroy current prefab model then attach new model
           Transform removeTemp = this.gameObject.transform.Find("ShifterTemp");
           removeTemp.parent = null;
-          //childAnimal.transform.parent = this.gameObject.transform;
+          childAnimal.transform.parent = this.gameObject.transform;
 
         }
       }
@@ -187,7 +195,7 @@ public class Shooting : MonoBehaviourPunCallbacks
         if (hit.collider.gameObject.CompareTag("Player") && hit.collider.gameObject.GetComponent<PlayerSetup>().roleTag != "hunter" && !hit.collider.gameObject.GetComponent<PhotonView>().IsMine){
           hit.collider.gameObject.GetComponent<PhotonView>().RPC("TakeDamage", RpcTarget.AllBuffered, 60);
         }
-        else if(hit.collider.gameObject.CompareTag("Mimic")){ //if hitss normal animal, get damaged
+        else if(hit.collider.gameObject.CompareTag("Mimic")){ //if hits normal animal, get damaged
           this.gameObject.GetComponent<PhotonView>().RPC("TakeDamage", RpcTarget.AllBuffered, 1);
         }
       }

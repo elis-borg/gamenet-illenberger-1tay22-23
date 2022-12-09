@@ -255,6 +255,7 @@ GameObject:
   - component: {fileID: 4171562829587174}
   - component: {fileID: 95951106970005182}
   - component: {fileID: 7729098093614823341}
+  - component: {fileID: -3727555206654462615}
   m_Layer: 0
   m_Name: SCharacter_Butterfly
   m_TagString: Mimic
@@ -311,6 +312,20 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300000, guid: 3a20fa05dc74f114bb237c4dba333092, type: 3}
+--- !u!114 &-3727555206654462615
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1556525557937860}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6feb6a721b9f754fbf7d3452ad6f4a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mName: butterfly
+  mSpeed: 15
 --- !u!1 &1556607663250786
 GameObject:
   m_ObjectHideFlags: 0

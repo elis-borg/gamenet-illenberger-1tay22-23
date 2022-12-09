@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 4555923442477812}
   - component: {fileID: 33591373912477740}
   - component: {fileID: 23848886738545110}
+  - component: {fileID: 7018736353846619094}
   m_Layer: 0
   m_Name: Rooster
   m_TagString: Mimic
@@ -81,3 +82,17 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &7018736353846619094
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1965910811585682}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6feb6a721b9f754fbf7d3452ad6f4a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mName: 
+  mSpeed: 0

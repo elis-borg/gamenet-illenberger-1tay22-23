@@ -317,8 +317,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 15
-  currentSpeed: 0
-  rotationSpeed: 200
   isControlEnabled: 0
 --- !u!114 &3860520958153244339
 MonoBehaviour:

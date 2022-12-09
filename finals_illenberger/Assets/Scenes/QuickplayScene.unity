@@ -1354,7 +1354,18 @@ MonoBehaviour:
   rolePrefabs:
   - {fileID: 4469389873861260762, guid: 68ecdfc00a0485c4cad92f1a13efa577, type: 3}
   - {fileID: 4469389873861260762, guid: 42f5b83b454c61240a2efaaa32e2c55c, type: 3}
-  shifterAnimalPrefabs: []
+  shifterAnimalPrefabs:
+  - {fileID: 1749815345293910, guid: 1bfdcf3515f7b3f448ab56de3e172d00, type: 3}
+  - {fileID: 1182029683073452, guid: bd67673dedf139149b1ce9570f665dd9, type: 3}
+  - {fileID: 1598459088720226, guid: ac4b1c0e518a6f243bc24ff601b30c3b, type: 3}
+  - {fileID: 1940725992751248, guid: 8ac99417fdd25b348be7e6ab4f557c68, type: 3}
+  - {fileID: 1675308188217246, guid: d5a1ebfe2ece7f34ead8d3b9568dee09, type: 3}
+  - {fileID: 1844827636381818, guid: e9aa5a34f48802f4ba6f12b51dd3a960, type: 3}
+  - {fileID: 1584313364877740, guid: 19e5a9b01df37324197bf991d76e2610, type: 3}
+  - {fileID: 1556525557937860, guid: 3936fb430f521bc44858935f4c78df21, type: 3}
+  - {fileID: 1745488152287196, guid: db923f34d2b96fe46abfab9f5d7d34eb, type: 3}
+  - {fileID: 1580388819070796, guid: 81295c46749991a44bb58dcf1621c362, type: 3}
+  - {fileID: 1920191581749620, guid: 259c822778d21d848bf2f11c3c57c958, type: 3}
   startingPositions:
   - {fileID: 1609513976}
   - {fileID: 1587936677}

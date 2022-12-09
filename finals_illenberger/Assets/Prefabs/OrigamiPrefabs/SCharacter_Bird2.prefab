@@ -639,6 +639,7 @@ GameObject:
   - component: {fileID: 4428894631334056}
   - component: {fileID: 95744679087321986}
   - component: {fileID: 7637726289982914881}
+  - component: {fileID: 4871855985329674665}
   m_Layer: 0
   m_Name: SCharacter_Bird2
   m_TagString: Mimic
@@ -695,6 +696,20 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300000, guid: d3dfb551f587bf148b9902d66279308b, type: 3}
+--- !u!114 &4871855985329674665
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1584313364877740}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6feb6a721b9f754fbf7d3452ad6f4a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mName: sbird
+  mSpeed: 17
 --- !u!1 &1611628611915640
 GameObject:
   m_ObjectHideFlags: 0

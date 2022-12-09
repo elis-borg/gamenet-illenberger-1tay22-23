@@ -1202,6 +1202,7 @@ GameObject:
   - component: {fileID: 4425596554519066}
   - component: {fileID: 95932855924321842}
   - component: {fileID: 3409621114902367088}
+  - component: {fileID: -4902978627033375142}
   m_Layer: 0
   m_Name: SCharacter_Squirrel
   m_TagString: Mimic
@@ -1258,6 +1259,20 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300000, guid: 265ee6fac4cc17345b23403e90e2ba45, type: 3}
+--- !u!114 &-4902978627033375142
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1745488152287196}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6feb6a721b9f754fbf7d3452ad6f4a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mName: squirrel
+  mSpeed: 18
 --- !u!1 &1757227337845944
 GameObject:
   m_ObjectHideFlags: 0

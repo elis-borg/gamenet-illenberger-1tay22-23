@@ -606,6 +606,7 @@ GameObject:
   - component: {fileID: 4188331867383602}
   - component: {fileID: 95674574316146116}
   - component: {fileID: -8720236926512357986}
+  - component: {fileID: 3316050510336353522}
   m_Layer: 0
   m_Name: SCharacter_Turtle
   m_TagString: Mimic
@@ -662,6 +663,20 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300000, guid: b1dd02c4daa7e6248ab9cf52038f20cf, type: 3}
+--- !u!114 &3316050510336353522
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1580388819070796}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6feb6a721b9f754fbf7d3452ad6f4a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mName: turtle
+  mSpeed: 10
 --- !u!1 &1606509526633532
 GameObject:
   m_ObjectHideFlags: 0
