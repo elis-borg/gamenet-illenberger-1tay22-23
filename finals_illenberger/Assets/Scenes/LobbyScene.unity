@@ -1642,8 +1642,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 669, y: 52.999966}
-  m_SizeDelta: {x: 100, y: 100}
+  m_AnchoredPosition: {x: 1344.762, y: 115.292915}
+  m_SizeDelta: {x: 143.736, y: 143.736}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &375094167
 MonoBehaviour:
@@ -3742,8 +3742,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 1054, y: 51.999928}
-  m_SizeDelta: {x: 734.9, y: 96.729}
+  m_AnchoredPosition: {x: 896.30457, y: 122}
+  m_SizeDelta: {x: 704.211, y: 92.69}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1037883121
 MonoBehaviour:
@@ -3778,7 +3778,8 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Don the disguise of nature's critters. Beware, you cannot shift too fast.
+  m_Text: Don the disguise of nature. Beware, it takes energy to shift into another
+    being.
 --- !u!222 &1037883122
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -4448,8 +4449,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -155, y: 80}
-  m_SizeDelta: {x: 250, y: 100}
+  m_AnchoredPosition: {x: -209.526, y: 101.811}
+  m_SizeDelta: {x: 359.053, y: 143.621}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1279214258
 MonoBehaviour:
@@ -5270,8 +5271,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 669, y: 53}
-  m_SizeDelta: {x: 100, y: 100}
+  m_AnchoredPosition: {x: 1344.762, y: 115.292915}
+  m_SizeDelta: {x: 143.736, y: 143.736}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1502881921
 MonoBehaviour:
@@ -6883,8 +6884,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 1054, y: 52}
-  m_SizeDelta: {x: 734.9, y: 96.729}
+  m_AnchoredPosition: {x: 896.30457, y: 122.00002}
+  m_SizeDelta: {x: 704.211, y: 92.69}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1976402711
 MonoBehaviour:

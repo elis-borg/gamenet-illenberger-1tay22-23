@@ -21,7 +21,7 @@ public class CountdownManager : MonoBehaviourPunCallbacks
 
         if(this.GetComponent<PlayerSetup>().roleTag == "shifter"){
           blindsImg.enabled = false;
-          //GetComponent<PlayerMovement>().isControlEnabled = true;
+          GetComponent<PlayerSetup>().camera.GetComponent<MouseLook>().isControlEnabled = true;
           GetComponent<PlayerSetup>().playerUi.transform.Find("FireBtn").GetComponent<Button>().interactable = true;
           GetComponent<PlayerSetup>().playerUi.transform.Find("FireBtn").GetComponent<Image>().sprite = buttonImg;
         }
@@ -58,6 +58,7 @@ public class CountdownManager : MonoBehaviourPunCallbacks
       if(this.GetComponent<PlayerSetup>().roleTag == "hunter"){
         blindsImg.enabled = false;
         GetComponent<PlayerMovement>().isControlEnabled = true;
+        GetComponent<PlayerSetup>().camera.GetComponent<MouseLook>().isControlEnabled = true;
         GetComponent<PlayerSetup>().playerUi.transform.Find("FireBtn").GetComponent<Button>().interactable = true;
         GetComponent<PlayerSetup>().playerUi.transform.Find("FireBtn").GetComponent<Image>().sprite = buttonImg;
       }

@@ -15,7 +15,7 @@ public class MimicHighlight : MonoBehaviour
 
   void Start()
   {
-    camera = transform.Find("Camera").GetComponent<Camera>();
+    camera = GetComponent<PlayerSetup>().camera; 
     range = this.gameObject.GetComponent<Shooting>().gunRange;
   }
 
@@ -33,8 +33,8 @@ public class MimicHighlight : MonoBehaviour
               animal = hit.transform.gameObject;
               //highlightedColor = new Color(hit.transform.GetComponent<Renderer>().material.color.r, hit.transform.GetComponent<Renderer>().material.color.g, hit.transform.GetComponent<Renderer>().material.color.b);
               if(hit.transform.childCount > 0){
-                ogColor = hit.transform.GetChild(0).GetComponent<Renderer>().material.color;
-                hit.transform.GetChild(0).GetComponent<Renderer>().material.SetColor("_Color", newColor);
+                ogColor = hit.transform.GetComponent<SkinnedMeshRenderer>().material.color;
+                hit.transform.GetComponent<SkinnedMeshRenderer>().material.SetColor("_Color", newColor);
                 Key = true;
               }
               else{
@@ -47,11 +47,11 @@ public class MimicHighlight : MonoBehaviour
         else { //if not a mimic and animal not empty then, return to normal color
             if(animal != null) {
               if(hit.transform.childCount > 0){
-                animal.transform.GetChild(0).GetComponent<Renderer>().material.SetColor("_Color", ogColor);
+                animal.transform.GetComponent<SkinnedMeshRenderer>().material.SetColor("_Color", ogColor);
                 animal = null;
               }
               else{
-                animal.GetComponent<Renderer>().material.SetColor("_Color", ogColor); //gains an error sometimes 
+                animal.GetComponent<Renderer>().material.SetColor("_Color", ogColor); //gains an error sometimes
                 animal = null;
               }
              }
@@ -64,7 +64,7 @@ public class MimicHighlight : MonoBehaviour
                // not anymore.
                if(animal != null) {
                  if(hit.transform.childCount > 0){
-                   animal.transform.GetChild(0).GetComponent<Renderer>().material.SetColor("_Color", ogColor);
+                   animal.transform.GetComponent<SkinnedMeshRenderer>().material.SetColor("_Color", ogColor);
                    animal = null;
                  }
                  else{

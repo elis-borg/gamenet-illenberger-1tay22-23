@@ -15,6 +15,8 @@ public class GameManager : MonoBehaviourPunCallbacks
                         shifterAnimalPrefabs;
     public Transform[] startingPositions;
 
+    public float timer = 120.0f; //for quickplay
+
     [Header ("UI")]
     public GameObject[] eliminateeTxtUI;
     public GameObject winnerTxtUI,
@@ -25,7 +27,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     [Header ("Player Stuff")]
     public int playersDone;
     public int shifterMax = 3, //3 (5), 2 (4), 1 (3), 1(2)
-               hunterMax = 2; //2 (5), 2(4), 2(3), 1(2) 
+               hunterMax = 2; //2 (5), 2(4), 2(3), 1(2)
 
     public List<GameObject> playerList = new List<GameObject>(); //add tags
     public List<GameObject> deadHunters = new List<GameObject>();
@@ -53,7 +55,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
           //instantiate players role
             if(PhotonNetwork.LocalPlayer.CustomProperties.TryGetValue(Constants.PLAYER_SELECTION_NUMBER, out playerSelectionNumber)){
-            Debug.Log(PhotonNetwork.LocalPlayer.NickName + " has chosen to be a " + rolePrefabs[(int)playerSelectionNumber].name);
+            //Debug.Log(PhotonNetwork.LocalPlayer.NickName + " has chosen to be a " + rolePrefabs[(int)playerSelectionNumber].name);
 
             int actorNumber = PhotonNetwork.LocalPlayer.ActorNumber;
             //Debug.Log(PhotonNetwork.LocalPlayer.NickName + "is actor#" + PhotonNetwork.LocalPlayer.ActorNumber);

@@ -11,7 +11,7 @@ public class Shooting : MonoBehaviourPunCallbacks
     public Camera camera;
     public GameObject hitFXPrefab;
 
-    public Transform turretOrigin;
+    //public Transform turretOrigin;
 
     [Header ("Gun Settings")]
     public float gunRange = 200f;
@@ -19,6 +19,7 @@ public class Shooting : MonoBehaviourPunCallbacks
     public float fireCooldown;
     private float currentFireCooldown = 0;
     public float projectileSpeed;
+    public bool isShootEnabled;
 
     [Header ("Player Stats")]
     public float startHealth;
@@ -41,18 +42,28 @@ public class Shooting : MonoBehaviourPunCallbacks
     // Start is called before the first frame update
     void Start()
     {
+      //camera = GetComponent<PlayerSetup>().camera;
       health = startHealth;
       healthbar.fillAmount = health / startHealth;
+      isShootEnabled = false;
       if(!isHunter) mimicName = "ShifterTemp";
     }
 
     void Update()
     {
+      Debug.DrawRay(camera.transform.position, camera.transform.forward * gunRange, Color.yellow);
       if(currentFireCooldown > 0) {
         currentFireCooldown -= Time.deltaTime;
         GetComponent<PlayerSetup>().playerUi.transform.Find("FireBtn").GetComponent<Button>().interactable = false;
       }
-      else if(currentFireCooldown <= 0 && GameManager.instance.cdTurnedOff == true) GetComponent<PlayerSetup>().playerUi.transform.Find("FireBtn").GetComponent<Button>().interactable = true;
+      else if(currentFireCooldown <= 0 && GameManager.instance.cdTurnedOff == true){
+          GetComponent<PlayerSetup>().playerUi.transform.Find("FireBtn").GetComponent<Button>().interactable = true;
+          isShootEnabled = !isShootEnabled;
+        }
+
+      if(Input.GetKey(KeyCode.Mouse0) && isShootEnabled && photonView.IsMine){
+        Fire();
+      }
     }
 
     public void Fire()
@@ -73,7 +84,7 @@ public class Shooting : MonoBehaviourPunCallbacks
     {
       this.health -= damage;
       this.healthbar.fillAmount = health/startHealth; //when copying dont forget to put image source for ur fillbar
-      Debug.Log(gameObject.name + " took 1 damage!");
+      //Debug.Log(gameObject.name + " took damage!");
 
 
       if(health <= 0){
@@ -105,7 +116,7 @@ public class Shooting : MonoBehaviourPunCallbacks
         GetComponent<PlayerSetup>().playerUi.transform.Find("FireBtn").GetComponent<Button>().enabled = false;
         if(gameObject.GetComponent<PlayerSetup>().roleTag == "hunter") {
           bool h = true;
-          deadTxt.GetComponent<Text>().text = "You were too irresponsible and therefore sent back.";
+          deadTxt.GetComponent<Text>().text = "You were too irresponsible and therefore was sent back to town.";
           GameManager.instance.BodyCount(this.gameObject, h);
         }
         else {
@@ -188,15 +199,17 @@ public class Shooting : MonoBehaviourPunCallbacks
       //Ray ray = new Ray (turretOrigin.transform.position, turretOrigin.transform.forward);
 
       if (Physics.Raycast(ray, out hit, gunRange)){
-        Debug.Log(hit.collider.gameObject.name + " tag: " + hit.collider.gameObject.tag);
-        Debug.DrawRay(camera.transform.position, camera.transform.forward * hit.distance, Color.yellow); //u can only view this in scene!
+        //Debug.Log(hit.collider.gameObject.name + " tag: " + hit.collider.gameObject.tag);
+        Debug.DrawRay(camera.transform.position, camera.transform.forward * hit.distance, Color.yellow);
 
         if (hit.collider.gameObject.CompareTag("Player") && hit.collider.gameObject.GetComponent<PlayerSetup>().roleTag != "hunter" && !hit.collider.gameObject.GetComponent<PhotonView>().IsMine){
           hit.collider.gameObject.GetComponent<PhotonView>().RPC("TakeDamage", RpcTarget.AllBuffered, 1);
         }
         else if(hit.collider.gameObject.CompareTag("Mimic")){ //if hits normal animal, get damaged
           GetComponent<PhotonView>().RPC("TakeDamage", RpcTarget.AllBuffered, 1);
-          Debug.Log("this isnt what your hunting for!");
+          //Debug.Log("this isnt what your hunting for!");
+          GameObject warningTxt = GameObject.Find("DeadTxt");
+          StartCoroutine(WarningText(warningTxt));
         }
       }
 
@@ -214,6 +227,18 @@ public class Shooting : MonoBehaviourPunCallbacks
         wtext.transform.GetChild(1).GetComponent<Text>().text = "Leaving room in " + leaveRoomTime.ToString(".00") ;
       }
       GameManager.instance.Gameover();
+    }
+
+    IEnumerator WarningText(GameObject warning)
+    {
+      float warningTime = 3f;
+
+      while(warningTime > 0){
+        yield return new WaitForSeconds(1.0f);
+        warning.GetComponent<Text>().text = "You're after a shapeshifter, not this.";
+        warningTime--;
+      }
+      warning.GetComponent<Text>().text = "";
     }
 
     void OnEvent(EventData photonEvent)
@@ -258,8 +283,8 @@ public class Shooting : MonoBehaviourPunCallbacks
 
         string area = (string)data[0];
 
-        Debug.Log("hunters are alerted!");
         GameManager.instance.HunterAlert(area);
+        Debug.Log("hunters are alerted!");
       }
     }
 }

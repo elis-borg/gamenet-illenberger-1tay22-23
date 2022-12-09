@@ -32,7 +32,6 @@ public class MushroomSpawner : MonoBehaviour
     void Update()
     {
       if(firstShroomSpawn == true && GameManager.instance.cdTurnedOff == true){
-        //Debug.Log("shroom spawning conditions met");
         StartCoroutine(ShroomSpawnTimer());
         firstShroomSpawn = !firstShroomSpawn;
       }
@@ -80,6 +79,7 @@ public class MushroomSpawner : MonoBehaviour
 
       while (timer > 0){
         yield return new WaitForSeconds(1.0f);
+        Debug.Log("spawning in " + timer);
         timer--;
       }
       SpawnMushroom();
@@ -91,6 +91,7 @@ public class MushroomSpawner : MonoBehaviour
 
       while (timer > 0){
         yield return new WaitForSeconds(1.0f);
+        Debug.Log("relocating in " + timer);
         timer--;
       }
 
