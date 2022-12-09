@@ -44,26 +44,7 @@ public class Mushroom : MonoBehaviour
 
         MushroomSpawner.instance.ShroomCollected();
         Debug.Log("shifter collected mushroom");
-        //try to call for rpc too
-
-        //#region RaiseEvent
-        //object[] data = new object[] {nickName, finishOrder, viewId};
-        /*object[] data = new object[] {}; //need to pass mushroom's last position in the map to alert hunters
-
-        RaiseEventOptions raiseEventOpts = new RaiseEventOptions
-        {
-          Receivers = ReceiverGroup.All,
-          CachingOption = EventCaching.AddToRoomCache
-        };
-
-        SendOptions sendOption = new SendOptions
-        {
-          Reliability = false
-        };
-
-        PhotonNetwork.RaiseEvent((byte) Constants.MushroomCollectedEventCode, data, raiseEventOpts, sendOption);*/
-        //#endregion
-
+        
         Destroy(this.gameObject);
       }
     }

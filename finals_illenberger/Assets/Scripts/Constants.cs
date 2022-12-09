@@ -9,7 +9,6 @@ public class Constants : MonoBehaviour
     public const string PLAYER_ROLE = "playerRole";
     public const string PLAYER_SELECTION_NUMBER = "playerSelectionNumber";
     public const byte EliminatedWhoEventCode = 1;
-    public const byte WhoFinishedEventCode = 0;
     public const byte WhoWonEventCode = 2;
-    public const byte MushroomCollectedEventCode = 3;
+    public const byte MushroomCollectedEventCode = 0;
 }

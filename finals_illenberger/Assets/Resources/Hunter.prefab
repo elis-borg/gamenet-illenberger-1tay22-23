@@ -246,8 +246,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 9153204180549611608}
-  - {fileID: 1981447099426753394}
   - {fileID: 3746124685600003736}
+  - {fileID: 1981447099426753394}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -365,6 +365,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   timerTxt: {fileID: 0}
   blindsImg: {fileID: 0}
+  buttonImg: {fileID: 21300000, guid: 3405cecb5d15f3f4496290219c0605b2, type: 3}
 --- !u!114 &5728228786356903507
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -381,11 +382,10 @@ MonoBehaviour:
   hitFXPrefab: {fileID: 9014551003606136187, guid: c5e8689ef28790344b33bfcd3cb364dd, type: 3}
   turretOrigin: {fileID: 9153204180549611608}
   gunRange: 50
-  laserDuration: 0.05
   fireRate: 1
   fireCooldown: 3
   projectileSpeed: 0
-  startHealth: 100
+  startHealth: 5
   healthbar: {fileID: 864054871308149710}
   isHunter: 1
 --- !u!1 &5036674526872243420
@@ -496,7 +496,7 @@ RectTransform:
   - {fileID: 8612873524519227460}
   - {fileID: 7539075347045230876}
   m_Father: {fileID: 4469389873861487098}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -755,11 +755,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1244539903904722007, guid: c2af11c01d1176e4d98619176b00d199, type: 3}
       propertyPath: m_Name
-      value: PT_Medieval_Male_Peasant_01
+      value: HunterModel
       objectReference: {fileID: 0}
     - target: {fileID: 1244539903904952439, guid: c2af11c01d1176e4d98619176b00d199, type: 3}
       propertyPath: m_RootOrder
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 1244539903904952439, guid: c2af11c01d1176e4d98619176b00d199, type: 3}
       propertyPath: m_LocalPosition.x

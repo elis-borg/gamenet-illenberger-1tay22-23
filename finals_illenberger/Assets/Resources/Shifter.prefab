@@ -366,6 +366,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   timerTxt: {fileID: 0}
   blindsImg: {fileID: 0}
+  buttonImg: {fileID: 21300000, guid: c8d3e8c6f50e4fe47a96628588ceca88, type: 3}
 --- !u!114 &5728228786356903507
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -382,13 +383,13 @@ MonoBehaviour:
   hitFXPrefab: {fileID: 9014551003606136187, guid: c5e8689ef28790344b33bfcd3cb364dd, type: 3}
   turretOrigin: {fileID: 9153204180549611608}
   gunRange: 100
-  laserDuration: 0.05
   fireRate: 1
   fireCooldown: 3
   projectileSpeed: 0
   startHealth: 3
   healthbar: {fileID: 864054871308149710}
   isHunter: 0
+  mimicName: 
 --- !u!114 &-2214699267450872648
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -608,7 +609,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7520646456184238785}
   m_LocalRotation: {x: 0.13052616, y: 0, z: 0, w: 0.9914449}
-  m_LocalPosition: {x: 0, y: 2.78, z: -2.83}
+  m_LocalPosition: {x: 0, y: 4, z: -3.83}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4469389873861487098}

@@ -229,11 +229,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 4930867481941569700, guid: dc213b54fcf3e2443a4d3066ca94cfbf, type: 3}
   m_PrefabInstance: {fileID: 4930867482120930627}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &909535448 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4930867481886698907, guid: dc213b54fcf3e2443a4d3066ca94cfbf, type: 3}
-  m_PrefabInstance: {fileID: 4930867482120930627}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &990343549 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7171756072335059186, guid: c59c14b624f4e8f4a8160ee0fc271b14, type: 3}
@@ -282,6 +277,7 @@ MonoBehaviour:
   collectedShrooms: 0
   firstShroomSpawn: 1
   collected: 0
+  relocating: 0
 --- !u!4 &1145594236
 Transform:
   m_ObjectHideFlags: 0
@@ -329,11 +325,9 @@ MonoBehaviour:
   - {fileID: 226634620}
   - {fileID: 1434818927}
   - {fileID: 861921381}
-  finisherTxtUI:
-  - {fileID: 1405476321}
-  - {fileID: 909535448}
-  - {fileID: 1546876930}
   eliminateeTxtUI:
+  - {fileID: 4930867482120930629}
+  - {fileID: 4930867482120930628}
   - {fileID: 763068924}
   - {fileID: 1942169863}
   - {fileID: 905000423}
@@ -342,18 +336,13 @@ MonoBehaviour:
   timeTxt: {fileID: 1691198727}
   blindsImgUI: {fileID: 1615583055}
   playersDone: 0
-  shifterMax: 3
-  hunterMax: 2
+  shifterMax: 1
+  hunterMax: 1
   playerList: []
   deadHunters: []
   deadShifters: []
   isGameover: 0
   cdTurnedOff: 0
---- !u!1 &1405476321 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4930867483450153122, guid: dc213b54fcf3e2443a4d3066ca94cfbf, type: 3}
-  m_PrefabInstance: {fileID: 4930867482120930627}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1434818927 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8276686390543196344, guid: a3044e151483e1c429697c167d4e3f4d, type: 3}
@@ -362,11 +351,6 @@ Transform:
 --- !u!1 &1540319339 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4930867483584802088, guid: dc213b54fcf3e2443a4d3066ca94cfbf, type: 3}
-  m_PrefabInstance: {fileID: 4930867482120930627}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &1546876930 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4930867483665284417, guid: dc213b54fcf3e2443a4d3066ca94cfbf, type: 3}
   m_PrefabInstance: {fileID: 4930867482120930627}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &1587936677 stripped
@@ -475,6 +459,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4930867482475620255, guid: dc213b54fcf3e2443a4d3066ca94cfbf, type: 3}
+      propertyPath: m_Text
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 4930867482591408927, guid: dc213b54fcf3e2443a4d3066ca94cfbf, type: 3}
       propertyPath: m_Name
       value: Canvas
@@ -563,8 +551,22 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4930867482630762000, guid: dc213b54fcf3e2443a4d3066ca94cfbf, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -114
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: dc213b54fcf3e2443a4d3066ca94cfbf, type: 3}
+--- !u!1 &4930867482120930628 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2864696296406493634, guid: dc213b54fcf3e2443a4d3066ca94cfbf, type: 3}
+  m_PrefabInstance: {fileID: 4930867482120930627}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &4930867482120930629 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7089318784810799719, guid: dc213b54fcf3e2443a4d3066ca94cfbf, type: 3}
+  m_PrefabInstance: {fileID: 4930867482120930627}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &6192203952818907228
 PrefabInstance:
   m_ObjectHideFlags: 0

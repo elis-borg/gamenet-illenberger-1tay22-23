@@ -111,7 +111,44 @@ public class MushroomSpawner : MonoBehaviour
     {
       collected = true;
       collectedShrooms++;
+
       if(relocating == true) CancelRelocation();
+
+      //try to call for rpc too
+
+      //#region RaiseEvent
+      string areaName = "";
+
+      switch (currentPoint){
+        case 0:
+          areaName = "A shifter has been spotted around the perpetual autumn giants."; break;
+        case 1:
+          areaName = "A shifter has been spotted around the area of thriving decay."; break;
+        case 2:
+          areaName = "A shifter has been spotted around the fragrant fields."; break;
+        case 3:
+          areaName = "A shifter has been spotted around craggy towering cliffs."; break;
+        case 4:
+          areaName = "A shifter has been spotted around grassy plains."; break;
+      }
+
+      object[] data = new object[] {areaName}; //need to pass mushroom's last position in the map to alert hunters
+
+      RaiseEventOptions raiseEventOpts = new RaiseEventOptions
+      {
+        Receivers = ReceiverGroup.All,
+        CachingOption = EventCaching.AddToRoomCache
+      };
+
+      SendOptions sendOption = new SendOptions
+      {
+        Reliability = false
+      };
+
+      PhotonNetwork.RaiseEvent((byte) Constants.MushroomCollectedEventCode, data, raiseEventOpts, sendOption);
+      //#endregion
+
+
       if(collectedShrooms >= shroomsNeeded) GameManager.instance.Gameover();
       Debug.Log("shrooms: " + collectedShrooms + "/" + shroomsNeeded);
     }

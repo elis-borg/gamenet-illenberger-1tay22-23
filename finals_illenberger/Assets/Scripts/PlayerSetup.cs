@@ -23,24 +23,20 @@ public class PlayerSetup : MonoBehaviourPunCallbacks
     {
         this.camera = transform.Find("Camera").GetComponent<Camera>();
         GameManager.instance.playerList.Add(this.gameObject);
-        playerNameText.text = photonView.Owner.NickName;
+        playerNameText.text = photonView.Owner.NickName; //works
 
         if(PhotonNetwork.CurrentRoom.CustomProperties.ContainsValue("fp")){ //try to make a key for roles
           GetComponent<PlayerMovement>().enabled = photonView.IsMine;
-          //GetComponent<MushroomSpawnController>().enabled = photonView.IsMine;
-          GetComponent<Camera>().enabled = photonView.IsMine;
+          camera.enabled = photonView.IsMine; //never do the GetComponent<Camera>(), it will cause u errors
+          shooting = this.GetComponent<Shooting>(); 
         }
         else if(PhotonNetwork.CurrentRoom.CustomProperties.ContainsValue("qp")){
           GetComponent<PlayerMovement>().enabled = photonView.IsMine;
-          //GetComponent<MushroomSpawnController>().enabled = photonView.IsMine;
-          GetComponent<Camera>().enabled = photonView.IsMine;
+          camera.enabled = photonView.IsMine;
           shooting = this.GetComponent<Shooting>();
-          Debug.Log("camera and movement script's photonview are true and shooting script has been retrieved");
-
 
           if(photonView.IsMine){
             playerUi = Instantiate(playerUiPrefab);
-            Debug.Log("ui for this player created");
 
             playerUi.transform.Find("QuitBtn").GetComponent<Button>().onClick.AddListener(() => GameManager.instance.LeaveRoom());
             playerUi.transform.Find("FireBtn").GetComponent<Button>().onClick.AddListener(() => shooting.Fire());

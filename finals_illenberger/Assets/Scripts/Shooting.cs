@@ -15,20 +15,18 @@ public class Shooting : MonoBehaviourPunCallbacks
 
     [Header ("Gun Settings")]
     public float gunRange = 200f;
-    public float laserDuration = 0.5f;
     public float fireRate = 1.0f;
     public float fireCooldown;
     private float currentFireCooldown = 0;
     public float projectileSpeed;
-
-    private LineRenderer laserLine;
 
     [Header ("Player Stats")]
     public float startHealth;
     private float health;
     private int eliminationOrder;
     public Image healthbar;
-    public bool isHunter = true; //determine if vehicle is of projectile or laser variety;
+    public bool isHunter = true; //determine if can shift or just darts
+    public string mimicName;
 
     private void OnEnable()
     {
@@ -45,11 +43,7 @@ public class Shooting : MonoBehaviourPunCallbacks
     {
       health = startHealth;
       healthbar.fillAmount = health / startHealth;
-
-      if(isHunter){
-        //laserLine = GameObject.Find("Laser").transform.GetChild(3).GetComponent<LineRenderer>();
-        laserLine = turretOrigin.GetComponent<LineRenderer>();
-      }
+      if(!isHunter) mimicName = "ShifterTemp";
     }
 
     void Update()
@@ -79,12 +73,16 @@ public class Shooting : MonoBehaviourPunCallbacks
     {
       this.health -= damage;
       this.healthbar.fillAmount = health/startHealth; //when copying dont forget to put image source for ur fillbar
+      Debug.Log(gameObject.name + " took 1 damage!");
+
 
       if(health <= 0){
         string victimName = photonView.Owner.NickName,
                killerName = info.Sender.NickName;
+        Player victim = photonView.Owner;
+        Player killer = info.photonView.Owner;
 
-        Die(victimName, killerName);
+        Die(victimName, killerName, victim, killer);
         gameObject.tag = "Dead";
       }
     }
@@ -96,7 +94,7 @@ public class Shooting : MonoBehaviourPunCallbacks
         Destroy(hitFXGameObj, 0.2f);
     }
 
-    public void Die(string victim, string killer){
+    public void Die(string vName, string kName, Player victim, Player killer){
       eliminationOrder++;
 
       if(photonView.IsMine){
@@ -104,15 +102,27 @@ public class Shooting : MonoBehaviourPunCallbacks
         GameObject deadTxt = GameObject.Find("DeadTxt");
 
         transform.GetComponent<PlayerMovement>().enabled = false;
-        GetComponent<PlayerSetup>().playerUi.transform.Find("FireBtn").GetComponent<Button>().interactable = false;
-        deadTxt.GetComponent<Text>().text = "You were eliminated from the race.";
-
-        //GameManager.instance.RemovePlayer(this.gameObject); //removes them from playerlist
+        GetComponent<PlayerSetup>().playerUi.transform.Find("FireBtn").GetComponent<Button>().enabled = false;
+        if(gameObject.GetComponent<PlayerSetup>().roleTag == "hunter") {
+          bool h = true;
+          deadTxt.GetComponent<Text>().text = "You were too irresponsible and therefore sent back.";
+          GameManager.instance.BodyCount(this.gameObject, h);
+        }
+        else {
+          bool h = false;
+          deadTxt.GetComponent<Text>().text = "You were careless. It's too late now.";
+          GameManager.instance.BodyCount(this.gameObject, h);
+        }
 
         //event data for elimination
-        object[] data = new object[] {victim, killer, eliminationOrder, viewId};
-        //event data for winning
-        object[] windata = new object[] {killer};
+        object[] data = new object[] {vName, kName, eliminationOrder, viewId};
+
+        string winningRole = "";
+        if(GameManager.instance.deadShifters.Count == GameManager.instance.shifterMax) winningRole = "hunter";
+        else if(GameManager.instance.deadHunters.Count == GameManager.instance.hunterMax) winningRole = "shifter";
+
+        //event data for which roles won
+        object[] windata = new object[] {winningRole};
 
         RaiseEventOptions raiseEventOpts = new RaiseEventOptions
         {
@@ -127,16 +137,10 @@ public class Shooting : MonoBehaviourPunCallbacks
 
         PhotonNetwork.RaiseEvent((byte) Constants.EliminatedWhoEventCode, data, raiseEventOpts, sendOption);
 
-        //int remainingshiftersneededcheck = PhotonNetwork.CurrentRoom.PlayerCount-1;
-        //int remainingshiftersneededcheck = GameManager.instance.shifterMax;
-        //int remainingshiftersneededcheck = GameManager.instance.hunterMax;
-
-        Debug.Log(GameManager.instance.deadShifters.Count + "/" + GameManager.instance.shifterMax); //dead shifters needed to declare hunters won
-        if(GameManager.instance.deadShifters.Count == GameManager.instance.shifterMax){
+        Debug.Log(GameManager.instance.deadShifters.Count + "/" + GameManager.instance.shifterMax);
+        Debug.Log(GameManager.instance.deadHunters.Count + "/" + GameManager.instance.hunterMax);
+        if(GameManager.instance.deadShifters.Count == GameManager.instance.shifterMax || GameManager.instance.deadHunters.Count == GameManager.instance.hunterMax){
           PhotonNetwork.RaiseEvent((byte) Constants.WhoWonEventCode, windata, raiseEventOpts, sendOption);
-        }
-        else if(GameManager.instance.deadHunters.Count == GameManager.instance.hunterMax){
-          PhotonNetwork.RaiseEvent((byte)Constants.WhoWonEventCode, windata, raiseEventOpts, sendOption);
         }
 
         //insert spectatorcode here
@@ -166,8 +170,10 @@ public class Shooting : MonoBehaviourPunCallbacks
           }
 
           //destroy current prefab model then attach new model
-          Transform removeTemp = this.gameObject.transform.Find("ShifterTemp");
+          Transform removeTemp = this.gameObject.transform.Find(mimicName);
           removeTemp.parent = null;
+          Destroy(removeTemp.gameObject);
+          mimicName = childAnimal.name;
           childAnimal.transform.parent = this.gameObject.transform;
 
         }
@@ -175,36 +181,25 @@ public class Shooting : MonoBehaviourPunCallbacks
     }
 
     [PunRPC]
-    IEnumerator ShootDart()
+    public void ShootDart()
     {
       Ray ray = camera.ViewportPointToRay(new Vector3(0.5f, 0.5f));
-
-      laserLine.enabled = true;
-      laserLine.SetPosition(0, turretOrigin.position);
-
       RaycastHit hit;
       //Ray ray = new Ray (turretOrigin.transform.position, turretOrigin.transform.forward);
 
-
       if (Physics.Raycast(ray, out hit, gunRange)){
-        //Debug.Log(hit.collider.gameObject.name);
-        //Debug.DrawRay(turretOrigin.transform.position, turretOrigin.transform.forward * hit.distance, Color.yellow); //u can only view this in scene!
-
-        laserLine.SetPosition(1, hit.point);
+        Debug.Log(hit.collider.gameObject.name + " tag: " + hit.collider.gameObject.tag);
+        Debug.DrawRay(camera.transform.position, camera.transform.forward * hit.distance, Color.yellow); //u can only view this in scene!
 
         if (hit.collider.gameObject.CompareTag("Player") && hit.collider.gameObject.GetComponent<PlayerSetup>().roleTag != "hunter" && !hit.collider.gameObject.GetComponent<PhotonView>().IsMine){
-          hit.collider.gameObject.GetComponent<PhotonView>().RPC("TakeDamage", RpcTarget.AllBuffered, 60);
+          hit.collider.gameObject.GetComponent<PhotonView>().RPC("TakeDamage", RpcTarget.AllBuffered, 1);
         }
         else if(hit.collider.gameObject.CompareTag("Mimic")){ //if hits normal animal, get damaged
-          this.gameObject.GetComponent<PhotonView>().RPC("TakeDamage", RpcTarget.AllBuffered, 1);
+          GetComponent<PhotonView>().RPC("TakeDamage", RpcTarget.AllBuffered, 1);
+          Debug.Log("this isnt what your hunting for!");
         }
       }
-      else{
-        laserLine.SetPosition(1,turretOrigin.position + turretOrigin.forward * gunRange); //limited beam of light
-      }
 
-      yield return new WaitForSeconds(laserDuration);
-      laserLine.enabled = false;
       photonView.RPC("CreateHitFX", RpcTarget.All, hit.point);
     }
 
@@ -234,26 +229,37 @@ public class Shooting : MonoBehaviourPunCallbacks
         GameObject elimOrderUiTxt = GameManager.instance.eliminateeTxtUI[eliminationOrder-1]; //moves the textbox
         elimOrderUiTxt.SetActive(true);
 
-        elimOrderUiTxt.GetComponent<Text>().text = vName +  " is eliminated by " + kName;
+        if(vName == kName) elimOrderUiTxt.GetComponent<Text>().text = vName +  " had too many offenses.";
+        else elimOrderUiTxt.GetComponent<Text>().text = vName +  " was caught by " + kName;
       }
 
       if(photonEvent.Code == (byte)Constants.WhoWonEventCode){
         object[] data = (object[]) photonEvent.CustomData;
 
-        string kName = (string)data[0];
+        string winner = (string)data[0];
 
-        Debug.Log(kName + " is the winner!");
-        //WinnerAnnouncement(kName);
+        Debug.Log(winner + "s are the winner!");
 
         GameObject winnertxt = GameManager.instance.winnerTxtUI; //moves the textbox
         winnertxt.GetComponent<Image>().enabled = true;
 
-        winnertxt.transform.GetChild(0).GetComponent<Text>().text = kName + " is the last man standing!";
+        if(winner == "shifter") winnertxt.transform.GetChild(0).GetComponent<Text>().text = "The fae escaped into the feywilds."; //win fae
+        else winnertxt.transform.GetChild(0).GetComponent<Text>().text = "The hunters spared no fae."; //win hunters
+
         foreach(GameObject go in GameManager.instance.playerList){
           GetComponent<PlayerMovement>().enabled = false;
           GetComponent<PlayerSetup>().playerUi.transform.Find("FireBtn").GetComponent<Button>().interactable = false;
         }
         StartCoroutine(ReturnPlayersToLobby(winnertxt));
+      }
+
+      if(photonEvent.Code == (byte)Constants.MushroomCollectedEventCode){
+        object[] data = (object[]) photonEvent.CustomData;
+
+        string area = (string)data[0];
+
+        Debug.Log("hunters are alerted!");
+        GameManager.instance.HunterAlert(area);
       }
     }
 }

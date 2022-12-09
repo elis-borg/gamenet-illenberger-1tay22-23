@@ -16,7 +16,6 @@ public class GameManager : MonoBehaviourPunCallbacks
     public Transform[] startingPositions;
 
     [Header ("UI")]
-    public GameObject[] finisherTxtUI; //to remove
     public GameObject[] eliminateeTxtUI;
     public GameObject winnerTxtUI,
                       alertTxtUI;
@@ -25,13 +24,12 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     [Header ("Player Stuff")]
     public int playersDone;
-    public int shifterMax = 3,
-               hunterMax = 2;
+    public int shifterMax = 3, //3 (5), 2 (4), 1 (3), 1(2)
+               hunterMax = 2; //2 (5), 2(4), 2(3), 1(2) 
 
     public List<GameObject> playerList = new List<GameObject>(); //add tags
     public List<GameObject> deadHunters = new List<GameObject>();
     public List<GameObject> deadShifters = new List<GameObject>();
-
 
     public bool isGameover, //win conditions are either all players make it to the last lap or only one player left in game
                 cdTurnedOff = false;
@@ -64,7 +62,6 @@ public class GameManager : MonoBehaviourPunCallbacks
           }
         }
 
-        foreach (GameObject go in finisherTxtUI) go.SetActive(false);
         foreach (GameObject go in eliminateeTxtUI) go.SetActive(false);
     }
 
@@ -99,13 +96,14 @@ public class GameManager : MonoBehaviourPunCallbacks
       isGameover = true;
     }
 
-    public void RemovePlayer(GameObject deadPlayer)
+    public void BodyCount(GameObject deadPlayer, bool h)
     {
-      playerList.Remove(deadPlayer);
-      deadHunters.Add(deadPlayer);
+      //playerList.Remove(deadPlayer);
+      if(h) deadHunters.Add(deadPlayer);
+      else deadShifters.Add(deadPlayer);
     }
 
-    IEnumerator HunterAlert()
+    public IEnumerator HunterAlert(string areaSpot)
     {
       float alertTime = 3.0f;
 
@@ -113,32 +111,8 @@ public class GameManager : MonoBehaviourPunCallbacks
         yield return new WaitForSeconds(1.0f);
         alertTime--;
 
-        //alertTxtUI.GetComponent<Text>().text = "A shifter has collected a mushroom! " + collectedShrooms + "/" + shroomsNeeded + " left.";
+        alertTxtUI.GetComponent<Text>().text = areaSpot;
       }
-    }
-
-    void OnEvent(EventData photonEvent)
-    {
-      if(photonEvent.Code == (byte)Constants.MushroomCollectedEventCode){ //maybe try implementing as an RPC instead?
-        //retrieve data that has been passed
-        object[] data = (object[]) photonEvent.CustomData;
-
-        string nickNameOfFinishedPlayer = (string)data[0];
-        //finishOrder = (int)data[1];
-        int viewId = (int)data[2];
-
-        //Debug.Log("A shifter has collected a mushroom! " + collectedShrooms + "/" + shroomsNeeded + " left.");
-
-        //GameObject orderUiTxt = GameManager.instance.finisherTxtUI[finishOrder-1];
-        //orderUiTxt.SetActive(true);
-
-        if(viewId == photonView.ViewID) {//this is you
-          //orderUiTxt.GetComponent<Text>().text = finishOrder + " " + nickNameOfFinishedPlayer + "(YOU)";
-        //  orderUiTxt.GetComponent<Text>().color = Color.red;
-        }
-        else{
-          //orderUiTxt.GetComponent<Text>().text = finishOrder + " " + nickNameOfFinishedPlayer;
-        }
-      }
+      alertTxtUI.GetComponent<Text>().text = "";
     }
 }

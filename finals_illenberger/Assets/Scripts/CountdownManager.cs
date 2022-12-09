@@ -8,6 +8,7 @@ public class CountdownManager : MonoBehaviourPunCallbacks
 {   //make sure ur game manager is a singleton first
     public Text timerTxt;
     public Image blindsImg;
+    public Sprite buttonImg;
 
     //[SerializeField]
     private float timeToStartHunt = 3.0f; //20
@@ -22,6 +23,7 @@ public class CountdownManager : MonoBehaviourPunCallbacks
           blindsImg.enabled = false;
           //GetComponent<PlayerMovement>().isControlEnabled = true;
           GetComponent<PlayerSetup>().playerUi.transform.Find("FireBtn").GetComponent<Button>().interactable = true;
+          GetComponent<PlayerSetup>().playerUi.transform.Find("FireBtn").GetComponent<Image>().sprite = buttonImg;
         }
     }
 
@@ -55,14 +57,11 @@ public class CountdownManager : MonoBehaviourPunCallbacks
     { //go back to vehicle movement and add isControlEnabled bool
       if(this.GetComponent<PlayerSetup>().roleTag == "hunter"){
         blindsImg.enabled = false;
-        Debug.Log("blinds removed");
         GetComponent<PlayerMovement>().isControlEnabled = true;
-        Debug.Log("controls enabled");
         GetComponent<PlayerSetup>().playerUi.transform.Find("FireBtn").GetComponent<Button>().interactable = true;
-        Debug.Log("firing enabled");
+        GetComponent<PlayerSetup>().playerUi.transform.Find("FireBtn").GetComponent<Image>().sprite = buttonImg;
       }
         GameManager.instance.cdTurnedOff = true;
-        Debug.Log("countdown manager off");
         this.enabled = false;
     }
 }
