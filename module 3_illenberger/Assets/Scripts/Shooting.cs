@@ -205,13 +205,7 @@ public class Shooting : MonoBehaviourPunCallbacks
         GameObject elimOrderUiTxt = RacingGameManager.instance.eliminateeTxtUI[eliminationOrder-1]; //moves the textbox
         elimOrderUiTxt.SetActive(true);
 
-        if(viewId == photonView.ViewID) {
-          elimOrderUiTxt.GetComponent<Text>().text = vName + "(YOU) is eliminated by " + kName;
-          elimOrderUiTxt.GetComponent<Text>().color = Color.red;
-        }
-        else{
-          elimOrderUiTxt.GetComponent<Text>().text = vName +  " is eliminated by " + kName;
-        }
+        elimOrderUiTxt.GetComponent<Text>().text = vName +  " is eliminated by " + kName;
       }
 
       if(photonEvent.Code == (byte)Constants.WhoWonEventCode){

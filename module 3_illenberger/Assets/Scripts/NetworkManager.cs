@@ -317,7 +317,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
         }
         else return false;
       }
-      return true; //if any of the ifs arent met
+    return true; //if any of the ifs arent met
     }
     //#endregion
 }
