@@ -82,6 +82,7 @@ public class GameManager : MonoBehaviourPunCallbacks
       }
     }
 
+    //#region PhotonNetwork Methods
     public override void OnLeftRoom()
     {
       SceneManager.LoadScene("LobbyScene");
@@ -91,6 +92,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
       PhotonNetwork.LeaveRoom();
     }
+    //#endregion
 
     public void Gameover()
     {

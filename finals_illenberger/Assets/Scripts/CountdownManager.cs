@@ -10,7 +10,7 @@ public class CountdownManager : MonoBehaviourPunCallbacks
     public Image blindsImg;
 
     //[SerializeField]
-    private float timeToStartHunt = 20.0f;
+    private float timeToStartHunt = 3.0f; //20
 
     // Start is called before the first frame update
     void Start()

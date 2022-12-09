@@ -42,8 +42,8 @@ public class Mushroom : MonoBehaviour
       if (col.GetComponent<Collider>().gameObject.CompareTag("Player") && col.GetComponent<PlayerSetup>().roleTag == "shifter"){
         //col.GetComponent<Collider>().gameObject.GetComponent<PhotonView>().RPC("TakeDamage", RpcTarget.AllBuffered, 1);
 
-        MushroomSpawner.instance.collected = true;
-        MushroomSpawner.instance.mushroom = null;
+        MushroomSpawner.instance.ShroomCollected();
+        Debug.Log("shifter collected mushroom");
         //try to call for rpc too
 
         //#region RaiseEvent

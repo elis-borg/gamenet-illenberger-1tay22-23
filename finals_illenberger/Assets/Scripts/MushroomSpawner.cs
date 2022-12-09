@@ -17,7 +17,8 @@ public class MushroomSpawner : MonoBehaviour
               shroomsNeeded,
               collectedShrooms;
     public bool firstShroomSpawn = true,
-                collected = false;
+                collected = false,
+                relocating = false;
 
     void Awake()
     {
@@ -31,20 +32,26 @@ public class MushroomSpawner : MonoBehaviour
     void Update()
     {
       if(firstShroomSpawn == true && GameManager.instance.cdTurnedOff == true){
-        Debug.Log("shroom spawning conditions met");
+        //Debug.Log("shroom spawning conditions met");
         StartCoroutine(ShroomSpawnTimer());
         firstShroomSpawn = !firstShroomSpawn;
       }
-      else if(mushroom != null && collected == false){
-        Debug.Log("calling relocateshroom()");
+      else if(mushroom != null && collected == false && relocating == false){
+        relocating = !relocating;
         StartCoroutine(RelocateShroom());
+      }
+      else if(collected == true && mushroom == null){
+        StartCoroutine(ShroomSpawnTimer());
+        collected = !collected;
       }
     }
 
     public void SpawnMushroom()
     {
       if(firstShroomSpawn){
-        PickShroomSpawnPoint(currentPoint);
+        //PickShroomSpawnPoint(currentPoint);
+        Debug.Log("first mushroom spawned!");
+        currentPoint = Random.Range(0, mushroomSpawns.Length);
         Debug.Log(currentPoint + ": " + mushroomSpawns[currentPoint].name);
 
         mushroom = PhotonNetwork.Instantiate(mushroomPrefab.name, mushroomSpawns[currentPoint].GetComponent<Transform>().position, Quaternion.identity);
@@ -59,6 +66,7 @@ public class MushroomSpawner : MonoBehaviour
 
         mushroom = PhotonNetwork.Instantiate(mushroomPrefab.name, mushroomSpawns[newPoint].GetComponent<Transform>().position, Quaternion.identity);
       }
+      Debug.Log("mushroom is at (" + currentPoint + ") " + mushroomSpawns[currentPoint].name);
     }
 
     private int PickShroomSpawnPoint(int num)
@@ -68,28 +76,43 @@ public class MushroomSpawner : MonoBehaviour
 
     IEnumerator ShroomSpawnTimer()
     {
-      float timer = 20.0f;
+      float timer = 10f; //20
 
       while (timer > 0){
         yield return new WaitForSeconds(1.0f);
         timer--;
-        Debug.Log("shroom spawns in " + timer);
       }
       SpawnMushroom();
     }
 
     IEnumerator RelocateShroom()
     {
-      float timer = 15f; //shifter has this much time to look for the shroom before it spawns elsewhere, avoids hunter camping if they spot it first
+      float timer = 5f; //15  //shifter has this much time to look for the shroom before it spawns elsewhere, avoids hunter camping if they spot it first
 
       while (timer > 0){
         yield return new WaitForSeconds(1.0f);
         timer--;
-        Debug.Log("shroom relocates in " + timer);
       }
 
       Destroy(mushroom);
-      Debug.Log("shroom is destroyed");
+      Debug.Log("shroom is relocated");
       SpawnMushroom();
+      relocating = !relocating;
+    }
+
+    public void CancelRelocation()
+    {
+      //breaks out of coroutine
+      StopCoroutine(RelocateShroom());
+      Debug.Log("relocation cancelled");
+    }
+
+    public void ShroomCollected()
+    {
+      collected = true;
+      collectedShrooms++;
+      if(relocating == true) CancelRelocation();
+      if(collectedShrooms >= shroomsNeeded) GameManager.instance.Gameover();
+      Debug.Log("shrooms: " + collectedShrooms + "/" + shroomsNeeded);
     }
 }
