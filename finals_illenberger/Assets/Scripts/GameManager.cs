@@ -9,28 +9,35 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviourPunCallbacks
 {
-    public GameObject[] rolePrefabs; //change to rolesprefab
-    public Transform[] startingPositions,
-                        mushroomSpawns;
+    public static GameManager instance = null;
+
+    public GameObject[] rolePrefabs,
+                        shifterAnimalPrefabs;
+    public Transform[] startingPositions;
+
+    [Header ("UI")]
     public GameObject[] finisherTxtUI; //to remove
     public GameObject[] eliminateeTxtUI;
     public GameObject winnerTxtUI,
                       alertTxtUI;
-
-    public GameObject mushroomPrefab,
-                      mushroom;
-
-    public static GameManager instance = null;
-
     public Text timeTxt;
     public Image blindsImgUI;
 
-    public int playersDone,
-              lastShroomPoint,
-              shroomsNeeded;
+
+    /*[Header ("Mushroom Stuff")]
+    public Transform[] mushroomSpawns;
+    public GameObject mushroomPrefab,
+                      mushroom;
+    public int lastShroomPoint,
+              shroomsNeeded,
+              collectedShrooms;
+    public bool firstShroomSpawn = true,
+                collected = false;*/
+
+    [Header ("Player Stuff")]
+    public int playersDone;
     public int shifterMax = 3,
-               hunterMax = 2,
-               collectedShrooms = 0;
+               hunterMax = 2;
 
     public List<GameObject> playerList = new List<GameObject>(); //add tags
     public List<GameObject> deadHunters = new List<GameObject>();
@@ -38,9 +45,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
 
     public bool isGameover, //win conditions are either all players make it to the last lap or only one player left in game
-                cdTurnedOff = false,
-                firstShroomSpawn = true,
-                collected = false;
+                cdTurnedOff = false;
 
     void Awake()
     {
@@ -80,7 +85,7 @@ public class GameManager : MonoBehaviourPunCallbacks
       //Debug.Log(PhotonNetwork.CurrentRoom.PlayerCount);
       //if(playersDone == PhotonNetwork.CurrentRoom.PlayerCount || deadHunters.Count == PhotonNetwork.CurrentRoom.PlayerCount-1) isGameover = true;
 
-      if(firstShroomSpawn == true && cdTurnedOff == true){
+      /*if(firstShroomSpawn == true && cdTurnedOff == true){
         Debug.Log("shroom spawning conditions met");
         StartCoroutine(ShroomSpawnTimer());
         firstShroomSpawn = !firstShroomSpawn;
@@ -88,7 +93,7 @@ public class GameManager : MonoBehaviourPunCallbacks
       else if(mushroom != null && collected == false){
         Debug.Log("calling relocateshroom()");
         StartCoroutine(RelocateShroom());
-      }
+      }*/
 
       if(isGameover){
         foreach(GameObject p in playerList) LeaveRoom();
@@ -120,7 +125,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     }
 
     //#region Mushrooms
-    public void SpawnMushroom()
+    /*public void SpawnMushroom()
     {
       if(firstShroomSpawn){
         lastShroomPoint = Random.Range(0, mushroomSpawns.Length);
@@ -161,7 +166,7 @@ public class GameManager : MonoBehaviourPunCallbacks
       Destroy(mushroom);
       Debug.Log("shroom is destroyed");
       SpawnMushroom();
-    }
+    }*/
     //#endregion
 
     IEnumerator HunterAlert()
@@ -172,7 +177,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         yield return new WaitForSeconds(1.0f);
         alertTime--;
 
-        alertTxtUI.GetComponent<Text>().text = "A shifter has collected a mushroom! " + collectedShrooms + "/" + shroomsNeeded + " left.";
+        //alertTxtUI.GetComponent<Text>().text = "A shifter has collected a mushroom! " + collectedShrooms + "/" + shroomsNeeded + " left.";
       }
     }
 
@@ -186,7 +191,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         //finishOrder = (int)data[1];
         int viewId = (int)data[2];
 
-        Debug.Log("A shifter has collected a mushroom! " + collectedShrooms + "/" + shroomsNeeded + " left.");
+        //Debug.Log("A shifter has collected a mushroom! " + collectedShrooms + "/" + shroomsNeeded + " left.");
 
         //GameObject orderUiTxt = GameManager.instance.finisherTxtUI[finishOrder-1];
         //orderUiTxt.SetActive(true);

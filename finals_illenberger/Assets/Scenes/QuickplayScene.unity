@@ -674,7 +674,7 @@ GameObject:
   - component: {fileID: 738419956}
   - component: {fileID: 738419955}
   m_Layer: 0
-  m_Name: ForestArea
+  m_Name: MeadowArea
   m_TagString: Untagged
   m_Icon: {fileID: -5938655980376293919, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
@@ -1309,10 +1309,22 @@ MonoBehaviour:
   m_GameObject: {fileID: 1145594234}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2ce48835b5b74ca4387689993b2449c6, type: 3}
+  m_Script: {fileID: 11500000, guid: 0176593141e3c7e429062b8edfd73ab2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mushroomSpawns: []
+  mushroomSpawns:
+  - {fileID: 990343549}
+  - {fileID: 107182716}
+  - {fileID: 789273920}
+  - {fileID: 634217861}
+  - {fileID: 738419954}
+  mushroomPrefab: {fileID: 2395663581925808803, guid: bb75e40a9d404064fb8489b4334c6e66, type: 3}
+  mushroom: {fileID: 0}
+  lastShroomPoint: 0
+  shroomsNeeded: 5
+  collectedShrooms: 0
+  firstShroomSpawn: 1
+  collected: 0
 --- !u!4 &1145594236
 Transform:
   m_ObjectHideFlags: 0
@@ -1342,18 +1354,13 @@ MonoBehaviour:
   rolePrefabs:
   - {fileID: 4469389873861260762, guid: 68ecdfc00a0485c4cad92f1a13efa577, type: 3}
   - {fileID: 4469389873861260762, guid: 42f5b83b454c61240a2efaaa32e2c55c, type: 3}
+  shifterAnimalPrefabs: []
   startingPositions:
   - {fileID: 1609513976}
   - {fileID: 1587936677}
   - {fileID: 226634620}
   - {fileID: 1434818927}
   - {fileID: 861921381}
-  mushroomSpawns:
-  - {fileID: 990343549}
-  - {fileID: 107182716}
-  - {fileID: 789273920}
-  - {fileID: 634217861}
-  - {fileID: 738419954}
   finisherTxtUI:
   - {fileID: 1405476321}
   - {fileID: 909535448}
@@ -1364,23 +1371,16 @@ MonoBehaviour:
   - {fileID: 905000423}
   winnerTxtUI: {fileID: 1540319339}
   alertTxtUI: {fileID: 1691198725}
-  mushroomPrefab: {fileID: 2395663581925808803, guid: bb75e40a9d404064fb8489b4334c6e66, type: 3}
-  mushroom: {fileID: 0}
   timeTxt: {fileID: 1691198727}
   blindsImgUI: {fileID: 1615583055}
   playersDone: 0
-  lastShroomPoint: 0
-  shroomsNeeded: 5
   shifterMax: 3
   hunterMax: 2
-  collectedShrooms: 0
   playerList: []
   deadHunters: []
   deadShifters: []
   isGameover: 0
   cdTurnedOff: 0
-  firstShroomSpawn: 1
-  collected: 0
 --- !u!1 &1405476321
 GameObject:
   m_ObjectHideFlags: 0

@@ -155,12 +155,12 @@ public class Shooting : MonoBehaviourPunCallbacks
 
         if (hit.collider.gameObject.CompareTag("Mimic")){
           //insert instatiate prefabs of mimicable animal models
-          GameObject childAnimal = PhotonNetwork.Instantiate();
+          //GameObject childAnimal = PhotonNetwork.Instantiate(mushroomPrefab.name, mushroomSpawns[lastShroomPoint].GetComponent<Transform>().position, Quaternion.identity);
 
           //destroy current prefab model then attach new model
           Transform removeTemp = this.gameObject.transform.Find("ShifterTemp");
           removeTemp.parent = null;
-          childAnimal.transform.parent = this.gameObject.transform;
+          //childAnimal.transform.parent = this.gameObject.transform;
 
         }
       }
@@ -184,7 +184,7 @@ public class Shooting : MonoBehaviourPunCallbacks
 
         laserLine.SetPosition(1, hit.point);
 
-        if (hit.collider.gameObject.CompareTag("Player") && hit.gameObject.GetComponent<PlayerSetup>().roleTag != "hunter" && !hit.collider.gameObject.GetComponent<PhotonView>().IsMine){
+        if (hit.collider.gameObject.CompareTag("Player") && hit.collider.gameObject.GetComponent<PlayerSetup>().roleTag != "hunter" && !hit.collider.gameObject.GetComponent<PhotonView>().IsMine){
           hit.collider.gameObject.GetComponent<PhotonView>().RPC("TakeDamage", RpcTarget.AllBuffered, 60);
         }
         else if(hit.collider.gameObject.CompareTag("Mimic")){ //if hitss normal animal, get damaged
