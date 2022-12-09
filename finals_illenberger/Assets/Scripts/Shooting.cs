@@ -58,7 +58,7 @@ public class Shooting : MonoBehaviourPunCallbacks
       }
       else if(currentFireCooldown <= 0 && GameManager.instance.cdTurnedOff == true){
           GetComponent<PlayerSetup>().playerUi.transform.Find("FireBtn").GetComponent<Button>().interactable = true;
-          isShootEnabled = !isShootEnabled;
+          isShootEnabled = true;
         }
 
       if(Input.GetKey(KeyCode.Mouse0) && isShootEnabled && photonView.IsMine){
@@ -77,6 +77,7 @@ public class Shooting : MonoBehaviourPunCallbacks
         }
       }
       currentFireCooldown = fireCooldown;
+      isShootEnabled = false; 
     }
 
     [PunRPC]
@@ -231,11 +232,11 @@ public class Shooting : MonoBehaviourPunCallbacks
 
     IEnumerator WarningText(GameObject warning)
     {
-      float warningTime = 3f;
+      float warningTime = 7f;
 
       while(warningTime > 0){
-        yield return new WaitForSeconds(1.0f);
-        warning.GetComponent<Text>().text = "You're after a shapeshifter, not this.";
+        yield return new WaitForSeconds(0.3f);
+        warning.GetComponent<Text>().text = "This isn't your prey, hunter.";
         warningTime--;
       }
       warning.GetComponent<Text>().text = "";

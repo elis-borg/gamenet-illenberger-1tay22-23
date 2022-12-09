@@ -41,8 +41,6 @@ public class Mushroom : MonoBehaviour
 
       if (col.GetComponent<Collider>().gameObject.CompareTag("Player") && col.GetComponent<PlayerSetup>().roleTag == "shifter"){
         MushroomSpawner.instance.ShroomCollected();
-        Debug.Log("shifter collected mushroom");
-
         Destroy(this.gameObject);
       }
     }

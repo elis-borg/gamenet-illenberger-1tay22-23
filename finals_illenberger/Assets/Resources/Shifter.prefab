@@ -157,9 +157,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 20
-  gravity: -9.81
+  gravity: -19.62
   groundDist: 0.4
-  jumpHeight: 3
+  jumpHeight: 1.5
   controller: {fileID: 202486189486337683}
   isControlEnabled: 1
   groundCheck: {fileID: 7146233199979491323}
@@ -228,7 +228,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   camera: {fileID: 5162314190006182952}
   hitFXPrefab: {fileID: 9014551003606136187, guid: c5e8689ef28790344b33bfcd3cb364dd, type: 3}
-  gunRange: 100
+  gunRange: 50
   fireRate: 1
   fireCooldown: 7
   projectileSpeed: 0
@@ -349,7 +349,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b8eb3d9b56b9344fb194ad13a34e60f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mouseSensitivity: 300
+  mouseSensitivity: 100
   playerBody: {fileID: 4469389873861487098}
   isControlEnabled: 1
 --- !u!1001 &9194386309320913477

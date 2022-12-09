@@ -13,12 +13,14 @@ public class MushroomSpawner : MonoBehaviour
     public Transform[] mushroomSpawns;
     public GameObject mushroomPrefab,
                       mushroom;
-    public int currentPoint,
-              shroomsNeeded,
+    public int shroomsNeeded,
               collectedShrooms;
     public bool firstShroomSpawn = true,
                 collected = false,
                 relocating = false;
+
+    [SerializeField]
+    private int currentPoint;
 
     void Awake()
     {
@@ -26,6 +28,12 @@ public class MushroomSpawner : MonoBehaviour
       else if(instance != this) Destroy(gameObject);
 
       //DontDestroyOnLoad(gameObject);
+    }
+
+    void Start()
+    {
+      currentPoint =  Random.Range(0, mushroomSpawns.Length);
+      Debug.Log(mushroomSpawns[currentPoint].name);
     }
 
     // Update is called once per frame
@@ -48,29 +56,20 @@ public class MushroomSpawner : MonoBehaviour
     public void SpawnMushroom()
     {
       if(firstShroomSpawn){
-        //PickShroomSpawnPoint(currentPoint);
         Debug.Log("first mushroom spawned!");
-        currentPoint = Random.Range(0, mushroomSpawns.Length);
-        Debug.Log(currentPoint + ": " + mushroomSpawns[currentPoint].name);
-
         mushroom = PhotonNetwork.Instantiate(mushroomPrefab.name, mushroomSpawns[currentPoint].GetComponent<Transform>().position, Quaternion.identity);
       }
       else{
         int newPoint = currentPoint;
-
-        //will loop until the new point isnt the same as current
-        /*while(newPoint == currentPoint){
-          PickShroomSpawnPoint(newPoint);
-        }*/
+        while(newPoint == currentPoint){
+          newPoint = Random.Range(0, mushroomSpawns.Length);
+        }
+        Debug.Log(mushroomSpawns[newPoint].name);
 
         mushroom = PhotonNetwork.Instantiate(mushroomPrefab.name, mushroomSpawns[newPoint].GetComponent<Transform>().position, Quaternion.identity);
+        currentPoint = newPoint;
       }
-      Debug.Log("mushroom is at (" + currentPoint + ") " + mushroomSpawns[currentPoint].name);
-    }
-
-    private int PickShroomSpawnPoint(int num)
-    {
-      return num = Random.Range(0, mushroomSpawns.Length);
+      Debug.Log(mushroomSpawns[currentPoint].name);
     }
 
     IEnumerator ShroomSpawnTimer()
