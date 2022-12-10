@@ -40,8 +40,10 @@ public class Mushroom : MonoBehaviour
     {
 
       if (col.GetComponent<Collider>().gameObject.CompareTag("Player") && col.GetComponent<PlayerSetup>().roleTag == "shifter"){
-        MushroomSpawner.instance.ShroomCollected();
-        Destroy(this.gameObject);
+        GameObject fairy = col.GetComponent<Collider>().gameObject;
+        fairy.GetComponent<PhotonView>().RPC("PickupShroom", RpcTarget.AllBuffered);
+        MushroomSpawner.instance.mushroom = null;
+        PhotonNetwork.Destroy(this.gameObject);
       }
     }
 }

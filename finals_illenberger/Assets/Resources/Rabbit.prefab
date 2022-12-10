@@ -112,7 +112,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mName: rabbit
-  mSpeed: 0
+  mSpeed: 18
 --- !u!114 &1961173074159554202
 MonoBehaviour:
   m_ObjectHideFlags: 0

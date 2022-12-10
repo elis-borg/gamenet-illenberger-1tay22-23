@@ -15,7 +15,7 @@ public class MimicHighlight : MonoBehaviour
 
   void Start()
   {
-    camera = GetComponent<PlayerSetup>().camera; 
+    camera = GetComponent<Shooting>().camera;
     range = this.gameObject.GetComponent<Shooting>().gunRange;
   }
 
@@ -40,7 +40,7 @@ public class MimicHighlight : MonoBehaviour
               else{
                 ogColor = hit.transform.GetComponent<Renderer>().material.color;
                 hit.transform.GetComponent<Renderer>().material.SetColor("_Color", newColor);
-                Key = true;
+                //Key = true;
               }
           }
         }
@@ -56,10 +56,10 @@ public class MimicHighlight : MonoBehaviour
               }
              }
              // Hitting something else.
-             Key = false;
+             //Key = false;
         }
       }
-      else if (Key == true)
+      /*else if (Key == true)
            {
                // not anymore.
                if(animal != null) {
@@ -74,7 +74,7 @@ public class MimicHighlight : MonoBehaviour
                }
                Debug.Log("Lost enemy");
                Key = false;
-           }
+           }*/
   }
 
   // Update is called once per frame

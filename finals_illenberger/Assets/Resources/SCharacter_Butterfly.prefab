@@ -328,7 +328,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mName: butterfly
-  mSpeed: 0
+  mSpeed: 10
 --- !u!114 &-3852516008429725534
 MonoBehaviour:
   m_ObjectHideFlags: 0

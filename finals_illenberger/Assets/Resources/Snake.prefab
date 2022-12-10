@@ -112,7 +112,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mName: snake
-  mSpeed: 0
+  mSpeed: 12
 --- !u!114 &4373547631410008206
 MonoBehaviour:
   m_ObjectHideFlags: 0

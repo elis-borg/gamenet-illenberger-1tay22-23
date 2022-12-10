@@ -15,13 +15,13 @@ public class GameManager : MonoBehaviourPunCallbacks
                         shifterAnimalPrefabs;
     public Transform[] startingPositions;
 
-    public float timer = 120.0f; //for quickplay
-
     [Header ("UI")]
     public GameObject[] eliminateeTxtUI;
-    public GameObject winnerTxtUI,
-                      alertTxtUI;
-    public Text timeTxt;
+    public GameObject winnerTxtUI;
+
+    public Text timeTxt,
+                countdownTxt,
+                alertTxt;
     public Image blindsImgUI;
 
     [Header ("Player Stuff")]
@@ -33,15 +33,23 @@ public class GameManager : MonoBehaviourPunCallbacks
     public List<GameObject> deadHunters = new List<GameObject>();
     public List<GameObject> deadShifters = new List<GameObject>();
 
-    public bool isGameover, //win conditions are either all players make it to the last lap or only one player left in game
-                cdTurnedOff = false;
+    public bool isGameover,
+                cdTurnedOff = false,
+                isThereWinner; //off for freeplay
+
+    [Header ("Quickplay Mode")]
+    public bool timedGM; //on for quickplay off for freeplay
+    public bool timerIsRunning = false;
+    public float gameDuration;
+    private float timeRemaining;
+
 
     void Awake()
     {
       if(instance == null) instance = this;
       else if(instance != this) Destroy(gameObject);
 
-      DontDestroyOnLoad(gameObject);
+      //DontDestroyOnLoad(gameObject);
       PhotonNetwork.AutomaticallySyncScene = true;
     }
     // Start is called before the first frame update
@@ -55,13 +63,18 @@ public class GameManager : MonoBehaviourPunCallbacks
 
           //instantiate players role
             if(PhotonNetwork.LocalPlayer.CustomProperties.TryGetValue(Constants.PLAYER_SELECTION_NUMBER, out playerSelectionNumber)){
-            //Debug.Log(PhotonNetwork.LocalPlayer.NickName + " has chosen to be a " + rolePrefabs[(int)playerSelectionNumber].name);
+            Debug.Log(PhotonNetwork.LocalPlayer.NickName + " has chosen to be a " + rolePrefabs[(int)playerSelectionNumber].name);
 
             int actorNumber = PhotonNetwork.LocalPlayer.ActorNumber;
             //Debug.Log(PhotonNetwork.LocalPlayer.NickName + "is actor#" + PhotonNetwork.LocalPlayer.ActorNumber);
             Vector3 instantiatePosition = startingPositions[actorNumber-1].position;
             PhotonNetwork.Instantiate(rolePrefabs[(int)playerSelectionNumber].name, instantiatePosition, Quaternion.identity);
+            //Debug.Log(PhotonNetwork.LocalPlayer.NickName + "instantiated at pos#" + instantiatePosition);
           }
+        }
+
+        if(timedGM){
+              timeRemaining = gameDuration;
         }
 
         foreach (GameObject go in eliminateeTxtUI) go.SetActive(false);
@@ -73,11 +86,31 @@ public class GameManager : MonoBehaviourPunCallbacks
       //Debug.Log(PhotonNetwork.CurrentRoom.PlayerCount);
       //if(playersDone == PhotonNetwork.CurrentRoom.PlayerCount || deadHunters.Count == PhotonNetwork.CurrentRoom.PlayerCount-1) isGameover = true;
 
-      if(isGameover){
-        foreach(GameObject p in playerList) LeaveRoom();
-        foreach(GameObject p in deadHunters) LeaveRoom();
-        foreach(GameObject p in deadShifters) LeaveRoom();
+      if(timedGM){
+        if(timerIsRunning){
+          if(timeRemaining > 0){
+            timeRemaining -= Time.deltaTime;
+            float minutes = Mathf.FloorToInt(timeRemaining / 60);
+            float seconds = Mathf.FloorToInt(timeRemaining % 60);
 
+            countdownTxt.text = "0" + minutes + ":" + seconds + " left";
+          }
+          else{
+            timeRemaining = 0;
+            timerIsRunning = false;
+            countdownTxt.text = "00:00 Time's up!";
+
+            StartCoroutine(Wait(5.0f));
+            Gameover(false);
+          }
+        }
+      }
+
+      if(isGameover){
+        foreach(GameObject p in playerList){
+          Destroy(p);
+          LeaveRoom();
+        }
       }
     }
 
@@ -93,8 +126,10 @@ public class GameManager : MonoBehaviourPunCallbacks
     }
     //#endregion
 
-    public void Gameover()
+    public void Gameover(bool answer)
     {
+      isThereWinner = answer;
+      if(timerIsRunning) timerIsRunning = !timerIsRunning;
       isGameover = true;
     }
 
@@ -105,16 +140,11 @@ public class GameManager : MonoBehaviourPunCallbacks
       else deadShifters.Add(deadPlayer);
     }
 
-    public IEnumerator HunterAlert(string areaSpot)
+    IEnumerator Wait(float time)
     {
-      float alertTime = 3.0f;
-
-      while (alertTime > 0){
-        yield return new WaitForSeconds(1.0f);
-        alertTime--;
-
-        alertTxtUI.GetComponent<Text>().text = areaSpot;
-      }
-      alertTxtUI.GetComponent<Text>().text = "";
+      winnerTxtUI.transform.GetChild(0).GetComponent<Text>().text = "Neither hunter or fae returned home.";
+      blindsImgUI.enabled = true;
+      yield return new WaitForSeconds(time);
     }
+
 }

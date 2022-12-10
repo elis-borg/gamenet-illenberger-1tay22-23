@@ -112,7 +112,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mName: monkey
-  mSpeed: 0
+  mSpeed: 15
 --- !u!114 &7598440094156498951
 MonoBehaviour:
   m_ObjectHideFlags: 0

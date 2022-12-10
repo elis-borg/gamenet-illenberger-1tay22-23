@@ -110,4 +110,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mName: snake
-  mSpeed: 13
+  mSpeed: 12

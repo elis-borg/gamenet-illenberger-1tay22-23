@@ -6,7 +6,7 @@ public class PlayerMovement : MonoBehaviour
 {
     public float speed = 20,
                   gravity = -9.81f,
-                  groundDist = 0.4f,
+                  groundDist = 1f,
                   jumpHeight = 3f;
     private float currentSpeed = 0;
     private float rotationSpeed = 200;

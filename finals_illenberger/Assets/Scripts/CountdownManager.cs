@@ -10,20 +10,14 @@ public class CountdownManager : MonoBehaviourPunCallbacks
     public Image blindsImg;
     public Sprite buttonImg;
 
-    //[SerializeField]
-    private float timeToStartHunt = 3.0f; //20
+    [SerializeField]
+    private float timeToStartHunt = 20.0f; //20
 
     // Start is called before the first frame update
     void Start()
     {
-        timerTxt = GameManager.instance.timeTxt;
-        blindsImg = GameManager.instance.blindsImgUI;
-
-        if(this.GetComponent<PlayerSetup>().roleTag == "shifter"){
-          blindsImg.enabled = false;
-          GetComponent<PlayerSetup>().camera.GetComponent<MouseLook>().isControlEnabled = true;
-          GetComponent<PlayerSetup>().playerUi.transform.Find("FireBtn").GetComponent<Button>().interactable = true;
-          GetComponent<PlayerSetup>().playerUi.transform.Find("FireBtn").GetComponent<Image>().sprite = buttonImg;
+        if(this.GetComponent<PlayerSetup>().roleTag == "hunter"){
+          if(blindsImg == null) blindsImg = GetComponent<PlayerSetup>().playerUi.transform.Find("Blinds").GetComponent<Image>(); //if playersetup doesnt do it properly
         }
     }
 
@@ -36,6 +30,10 @@ public class CountdownManager : MonoBehaviourPunCallbacks
               photonView.RPC("SetTime", RpcTarget.AllBuffered, timeToStartHunt);
             }
             else if(timeToStartHunt < 0) photonView.RPC("StartHunt", RpcTarget.AllBuffered);
+          }
+
+          if(this.GetComponent<PlayerSetup>().roleTag == "hunter" && blindsImg == null){
+            blindsImg = GetComponent<PlayerSetup>().playerUi.transform.Find("Blinds").GetComponent<Image>();
           }
     }
 
@@ -54,15 +52,19 @@ public class CountdownManager : MonoBehaviourPunCallbacks
 
     [PunRPC]
     public void StartHunt()
-    { //go back to vehicle movement and add isControlEnabled bool
+    {
       if(this.GetComponent<PlayerSetup>().roleTag == "hunter"){
         blindsImg.enabled = false;
         GetComponent<PlayerMovement>().isControlEnabled = true;
+        //GetComponent<BoxCollider>().enabled = false; //turn off this catchnet when movement is enabled
         GetComponent<PlayerSetup>().camera.GetComponent<MouseLook>().isControlEnabled = true;
         GetComponent<PlayerSetup>().playerUi.transform.Find("FireBtn").GetComponent<Button>().interactable = true;
         GetComponent<PlayerSetup>().playerUi.transform.Find("FireBtn").GetComponent<Image>().sprite = buttonImg;
       }
         GameManager.instance.cdTurnedOff = true;
+        if(PhotonNetwork.CurrentRoom.CustomProperties.ContainsValue("qp")){
+          GameManager.instance.timerIsRunning = true;
+        }
         this.enabled = false;
     }
 }

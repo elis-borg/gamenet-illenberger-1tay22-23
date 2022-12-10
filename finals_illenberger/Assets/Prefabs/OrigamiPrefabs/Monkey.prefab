@@ -110,4 +110,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mName: monkey
-  mSpeed: 18
+  mSpeed: 15

@@ -112,7 +112,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mName: horse
-  mSpeed: 0
+  mSpeed: 23
 --- !u!114 &-8216875181125642804
 MonoBehaviour:
   m_ObjectHideFlags: 0

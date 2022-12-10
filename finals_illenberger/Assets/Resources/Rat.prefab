@@ -112,7 +112,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mName: rat
-  mSpeed: 0
+  mSpeed: 18
 --- !u!114 &6218559771906396096
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -679,7 +679,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mName: turtle
-  mSpeed: 0
+  mSpeed: 7
 --- !u!114 &-2525423951317615133
 MonoBehaviour:
   m_ObjectHideFlags: 0

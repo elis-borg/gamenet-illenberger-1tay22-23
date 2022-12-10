@@ -736,7 +736,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mName: fbird
-  mSpeed: 0
+  mSpeed: 16
 --- !u!114 &-2444451336682123179
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -610,7 +610,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mName: sbird
-  mSpeed: 17
+  mSpeed: 13
 --- !u!137 &1173282464864600049
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 0

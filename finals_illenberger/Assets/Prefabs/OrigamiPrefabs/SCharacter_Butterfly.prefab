@@ -294,7 +294,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mName: butterfly
-  mSpeed: 15
+  mSpeed: 10
 --- !u!1 &1556607663250786
 GameObject:
   m_ObjectHideFlags: 0

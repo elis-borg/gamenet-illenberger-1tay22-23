@@ -645,7 +645,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mName: turtle
-  mSpeed: 10
+  mSpeed: 7
 --- !u!1 &1606509526633532
 GameObject:
   m_ObjectHideFlags: 0

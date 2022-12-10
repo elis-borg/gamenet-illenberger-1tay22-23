@@ -33,38 +33,43 @@ public class MushroomSpawner : MonoBehaviour
     void Start()
     {
       currentPoint =  Random.Range(0, mushroomSpawns.Length);
-      Debug.Log(mushroomSpawns[currentPoint].name);
+      if(PhotonNetwork.CurrentRoom.CustomProperties.ContainsValue("qp")){
+        shroomsNeeded = 3;
+      }
     }
 
     // Update is called once per frame
     void Update()
     {
-      if(firstShroomSpawn == true && GameManager.instance.cdTurnedOff == true){
-        StartCoroutine(ShroomSpawnTimer());
-        firstShroomSpawn = !firstShroomSpawn;
-      }
-      else if(mushroom != null && collected == false && relocating == false){
-        relocating = !relocating;
-        StartCoroutine(RelocateShroom());
-      }
-      else if(collected == true && mushroom == null){
-        StartCoroutine(ShroomSpawnTimer());
-        collected = !collected;
+      if(PhotonNetwork.IsMasterClient){ //so that only one is calling mushrooms
+        if(mushroom == null && GameManager.instance.cdTurnedOff == true){
+          //if mushroom is empty and its the firsttime spawn and countdown managers are off for all players, then spawn the mushroom and turn off firstspawn bool
+          if(firstShroomSpawn){
+            StartCoroutine(ShroomSpawnTimer());
+            firstShroomSpawn = !firstShroomSpawn;
+          }
+        }
+        //else if mushroom isnt empty, hasnt been collected yet and relocation is off then turn on relocation bool and relocate it
+        else if(mushroom != null && collected == false && relocating == false){
+          relocating = !relocating; //turning this on allowes for only 1 call of relocation
+          StartCoroutine(RelocateShroom());
+          Debug.Log("uncollected mushroom about to be relocated");
+        }
       }
     }
 
     public void SpawnMushroom()
     {
       if(firstShroomSpawn){
-        Debug.Log("first mushroom spawned!");
+        //the first value of currentpoint has been called at start
         mushroom = PhotonNetwork.Instantiate(mushroomPrefab.name, mushroomSpawns[currentPoint].GetComponent<Transform>().position, Quaternion.identity);
+        Debug.Log("first mushroom spawned!");
       }
       else{
         int newPoint = currentPoint;
         while(newPoint == currentPoint){
           newPoint = Random.Range(0, mushroomSpawns.Length);
         }
-        Debug.Log(mushroomSpawns[newPoint].name);
 
         mushroom = PhotonNetwork.Instantiate(mushroomPrefab.name, mushroomSpawns[newPoint].GetComponent<Transform>().position, Quaternion.identity);
         currentPoint = newPoint;
@@ -74,11 +79,17 @@ public class MushroomSpawner : MonoBehaviour
 
     IEnumerator ShroomSpawnTimer()
     {
-      float timer = 10f; //20
+      float timer;
+      if(PhotonNetwork.CurrentRoom.CustomProperties.ContainsValue("qp")) {
+        timer = 10f;
+      }
+      else {
+        timer = 20f; //20 normal
+      }
 
       while (timer > 0){
         yield return new WaitForSeconds(1.0f);
-        Debug.Log("spawning in " + timer);
+        //Debug.Log("spawning in " + timer);
         timer--;
       }
       SpawnMushroom();
@@ -86,17 +97,20 @@ public class MushroomSpawner : MonoBehaviour
 
     IEnumerator RelocateShroom()
     {
-      float timer = 5f; //15  //shifter has this much time to look for the shroom before it spawns elsewhere, avoids hunter camping if they spot it first
+      float timer = 30f; //normal  //shifter has this much time to look for the shroom before it spawns elsewhere, avoids hunter camping if they spot it first
 
       while (timer > 0){
         yield return new WaitForSeconds(1.0f);
-        Debug.Log("relocating in " + timer);
+        //Debug.Log("relocating in " + timer);
         timer--;
       }
 
-      Destroy(mushroom);
-      Debug.Log("shroom is relocated");
-      SpawnMushroom();
+      //Destroy(mushroom);
+      int newPoint = currentPoint;
+      while(newPoint == currentPoint) newPoint = Random.Range(0, mushroomSpawns.Length);
+
+      mushroom.transform.position = mushroomSpawns[newPoint].GetComponent<Transform>().position;
+      Debug.Log("shroom is relocated to " + mushroomSpawns[newPoint].name);
       relocating = !relocating;
     }
 
@@ -107,18 +121,14 @@ public class MushroomSpawner : MonoBehaviour
       Debug.Log("relocation cancelled");
     }
 
-    public void ShroomCollected()
+    [PunRPC]
+    public void ShroomCollected(GameObject fae)
     {
+      if(relocating == true) CancelRelocation();
       collected = true;
       collectedShrooms++;
 
-      if(relocating == true) CancelRelocation();
-
-      //try to call for rpc too
-
-      //#region RaiseEvent
       string areaName = "";
-
       switch (currentPoint){
         case 0:
           areaName = "A shifter has been spotted around the perpetual autumn giants."; break;
@@ -132,24 +142,11 @@ public class MushroomSpawner : MonoBehaviour
           areaName = "A shifter has been spotted around grassy plains."; break;
       }
 
-      object[] data = new object[] {areaName}; //need to pass mushroom's last position in the map to alert hunters
+      fae.GetComponent<PhotonView>().RPC("HunterAlert", RpcTarget.All, areaName);
 
-      RaiseEventOptions raiseEventOpts = new RaiseEventOptions
-      {
-        Receivers = ReceiverGroup.All,
-        CachingOption = EventCaching.AddToRoomCache
-      };
-
-      SendOptions sendOption = new SendOptions
-      {
-        Reliability = false
-      };
-
-      PhotonNetwork.RaiseEvent((byte) Constants.MushroomCollectedEventCode, data, raiseEventOpts, sendOption);
-      //#endregion
-
-
-      if(collectedShrooms >= shroomsNeeded) GameManager.instance.Gameover();
-      Debug.Log("shrooms: " + collectedShrooms + "/" + shroomsNeeded);
+      if(collectedShrooms == shroomsNeeded){
+        fae.GetComponent<PhotonView>().RPC("ShroomsComplete", RpcTarget.All, "shifter");
+      }
+      else StartCoroutine(ShroomSpawnTimer());
     }
 }

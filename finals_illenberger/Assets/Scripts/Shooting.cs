@@ -45,7 +45,6 @@ public class Shooting : MonoBehaviourPunCallbacks
       //camera = GetComponent<PlayerSetup>().camera;
       health = startHealth;
       healthbar.fillAmount = health / startHealth;
-      isShootEnabled = false;
       if(!isHunter) mimicName = "ShifterTemp";
     }
 
@@ -64,6 +63,7 @@ public class Shooting : MonoBehaviourPunCallbacks
       if(Input.GetKey(KeyCode.Mouse0) && isShootEnabled && photonView.IsMine){
         Fire();
       }
+      if(Input.GetKey(KeyCode.X) && photonView.IsMine) GameManager.instance.LeaveRoom();
     }
 
     public void Fire()
@@ -73,11 +73,12 @@ public class Shooting : MonoBehaviourPunCallbacks
           photonView.RPC("ShootDart", RpcTarget.All);
         }
         else{
-          photonView.RPC("Mimic", RpcTarget.All);
+          photonView.RPC("Mimic", RpcTarget.AllBuffered);
+          //Mimic();
         }
       }
       currentFireCooldown = fireCooldown;
-      isShootEnabled = false; 
+      isShootEnabled = false;
     }
 
     [PunRPC]
@@ -167,27 +168,31 @@ public class Shooting : MonoBehaviourPunCallbacks
       Ray ray = camera.ViewportPointToRay(new Vector3(0.5f, 0.5f));
 
       if (Physics.Raycast(ray, out hit, 200)){
-        string turnInto = this.GetComponent<MimicHighlight>().animal.GetComponent<Mimic>().mName;
-        GameObject childAnimal = null;
 
-        if (hit.collider.gameObject.CompareTag("Mimic")){
-          //insert instatiate prefabs of mimicable animal models
+        if(hit.collider.gameObject.CompareTag("Mimic")){
+          GameObject childAnimal = null; //animal theyll transform into and be attached to the gameobj
+          string turnInto = this.GetComponent<MimicHighlight>().animal.GetComponent<Mimic>().mName;
+          Debug.Log("wants to turn into " + turnInto);
+          int mimicSpeed = this.GetComponent<MimicHighlight>().animal.GetComponent<Mimic>().mSpeed;
 
-          //rifle thru gamemanager animal prefabs, find which matches then retrieve the index
+          int parentViewID = this.gameObject.GetComponent<PhotonView>().ViewID;
+          object[] mimicData = new object[] {parentViewID}; //customdata for instantiation
+
           for(int i = 0; i < GameManager.instance.shifterAnimalPrefabs.Length; i++){
-            if(GameManager.instance.shifterAnimalPrefabs[i].GetComponent<Mimic>().mName == turnInto){
-                childAnimal = PhotonNetwork.Instantiate(GameManager.instance.shifterAnimalPrefabs[i].name, this.transform.position, this.transform.rotation * Quaternion.identity);
+            if(GameManager.instance.shifterAnimalPrefabs[i].GetComponent<Mimic>().mName == turnInto){ //if prefabs name and highlighted animal match then
+                //destroy current prefab model then attach new model
+                Transform removeTemp = this.gameObject.transform.Find(mimicName);
+                removeTemp.parent = null;
+                Destroy(removeTemp.gameObject);
+
+                //childAnimal = PhotonNetwork.Instantiate(GameManager.instance.shifterAnimalPrefabs[i].name, this.transform.position, this.transform.rotation * Quaternion.identity);
+                childAnimal = PhotonNetwork.Instantiate(GameManager.instance.shifterAnimalPrefabs[i].name, this.transform.position, Quaternion.identity, 0, mimicData);
+                //childAnimal.transform.parent = this.gameObject.transform; //manual non-network
+                mimicName = childAnimal.name;
+                this.GetComponent<PlayerMovement>().speed = childAnimal.GetComponent<Mimic>().mSpeed;
                 break;
-              }
+            }
           }
-
-          //destroy current prefab model then attach new model
-          Transform removeTemp = this.gameObject.transform.Find(mimicName);
-          removeTemp.parent = null;
-          Destroy(removeTemp.gameObject);
-          mimicName = childAnimal.name;
-          childAnimal.transform.parent = this.gameObject.transform;
-
         }
       }
     }
@@ -217,17 +222,58 @@ public class Shooting : MonoBehaviourPunCallbacks
       photonView.RPC("CreateHitFX", RpcTarget.All, hit.point);
     }
 
+    [PunRPC]
+    public void PickupShroom()
+    {
+      MushroomSpawner.instance.ShroomCollected(this.gameObject);
+      Debug.Log("shifter picked up a shroom");
+    }
+
+    [PunRPC]
+    IEnumerator HunterAlert(string areaSpot)
+    {
+      float alertTime = 3.5f;
+      Text alertNotif = GameManager.instance.alertTxt;
+
+      while (alertTime > 0){
+        yield return new WaitForSeconds(1.0f);
+        alertTime--;
+
+        alertNotif.text = areaSpot;
+      }
+      alertNotif.text = "";
+    }
+
+    [PunRPC]
+    public void ShroomsComplete(string winner)
+    {
+      object[] windata = new object[] {winner};
+
+      RaiseEventOptions raiseEventOpts = new RaiseEventOptions
+      {
+        Receivers = ReceiverGroup.All,
+        CachingOption = EventCaching.AddToRoomCache
+      };
+
+      SendOptions sendOption = new SendOptions
+      {
+        Reliability = false
+      };
+
+      PhotonNetwork.RaiseEvent((byte) Constants.WhoWonEventCode, windata, raiseEventOpts, sendOption);
+    }
+
     IEnumerator ReturnPlayersToLobby(GameObject wtext)
     {
-      float leaveRoomTime = 5.0f;
+      float leaveRoomTime = 15.0f;
 
       while (leaveRoomTime > 0){
         yield return new WaitForSeconds(1.0f);
         leaveRoomTime--;
 
-        wtext.transform.GetChild(1).GetComponent<Text>().text = "Leaving room in " + leaveRoomTime.ToString(".00") ;
+        wtext.transform.GetChild(1).GetComponent<Text>().text = "Leaving room in " + leaveRoomTime.ToString(".00s") ;
       }
-      GameManager.instance.Gameover();
+      GameManager.instance.Gameover(true);
     }
 
     IEnumerator WarningText(GameObject warning)
@@ -264,8 +310,9 @@ public class Shooting : MonoBehaviourPunCallbacks
 
         string winner = (string)data[0];
 
-        Debug.Log(winner + "s are the winner!");
+        //Debug.Log(winner + "s are the winner!")
 
+        GameManager.instance.blindsImgUI.enabled = true;
         GameObject winnertxt = GameManager.instance.winnerTxtUI; //moves the textbox
         winnertxt.GetComponent<Image>().enabled = true;
 
@@ -275,17 +322,9 @@ public class Shooting : MonoBehaviourPunCallbacks
         foreach(GameObject go in GameManager.instance.playerList){
           GetComponent<PlayerMovement>().enabled = false;
           GetComponent<PlayerSetup>().playerUi.transform.Find("FireBtn").GetComponent<Button>().interactable = false;
+          //GetComponent<PlayerSetup>().playerUi.transform.Find("Blinds").GetComponent<Image>().enabled = true;
         }
         StartCoroutine(ReturnPlayersToLobby(winnertxt));
-      }
-
-      if(photonEvent.Code == (byte)Constants.MushroomCollectedEventCode){
-        object[] data = (object[]) photonEvent.CustomData;
-
-        string area = (string)data[0];
-
-        GameManager.instance.HunterAlert(area);
-        Debug.Log("hunters are alerted!");
       }
     }
 }

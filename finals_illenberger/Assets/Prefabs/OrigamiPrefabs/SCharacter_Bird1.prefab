@@ -702,7 +702,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mName: fbird
-  mSpeed: 17
+  mSpeed: 16
 --- !u!1 &1890687264963206
 GameObject:
   m_ObjectHideFlags: 0

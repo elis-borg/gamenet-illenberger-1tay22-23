@@ -112,7 +112,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mName: goat
-  mSpeed: 0
+  mSpeed: 20
 --- !u!114 &-3698203544758948648
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1275,7 +1275,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mName: squirrel
-  mSpeed: 0
+  mSpeed: 18
 --- !u!114 &3518467016796837431
 MonoBehaviour:
   m_ObjectHideFlags: 0
